@@ -3,135 +3,77 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>智慧聯絡簿 v20.0 (終極完美版) — 修正版</title>
-  <!-- A) 改用 <link> 載入字型，避免 @import 造成匯出檔 CSS 被誤改壞掉 -->
+  <title>智慧聯絡簿 v20.2（穩定修正版）</title>
+  <!-- 字型改用 <link>，避免 @import 影響匯出 -->
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
+  <!-- 匯出圖片用 -->
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <style>
-    /* CSS v20.1 - 修正匯出與儲存功能、移除 @import、隱藏作者標記 */
-    
-    @font-face {
-      font-family: 'NumericAndLatinFont';
-      src: local('Inter'), local('Noto Sans TC'), local('Arial');
-      unicode-range: U+0020-007F;
-    }
-
-    :root {
-      --primary-color: #87CEEB;
-      --card-bg: rgba(80, 80, 80, 0.65);
-      --card-border: rgba(255, 255, 255, 0.2);
-      --text-color-primary: rgba(245, 245, 220, 0.95);
-      --text-color-secondary: rgba(245, 245, 220, 0.6);
-      --input-bg: rgba(0, 0, 0, 0.35);
-      --shadow-color: rgba(0, 0, 0, 0.4);
-      --control-border-radius: 12px;
-      --delete-color: #FF6347;
-      --item-font-size: 1.5em;
-    }
-    * { box-sizing: border-box; }
-    html, body { height: 100%; margin: 0; }
-    body {
-      font-family: 'Noto Sans TC', sans-serif;
-      color: var(--text-color-primary);
-      -webkit-font-smoothing: antialiased;
-      background-image: url('https://www.transparenttextures.com/patterns/green-dust-and-scratches.png');
-      background-color: #3D4A45;
-      background-repeat: repeat;
-      padding: 20px 20px 70px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .container { max-width: 800px; width: 100%; }
-    .main-header { text-align: center; margin-bottom: 25px; }
-    .main-title { font-family: 'ZCOOL KuaiLe', sans-serif; font-size: 3em; font-weight: 900; color: #FFF; text-shadow: 0 3px 15px rgba(0,0,0,0.5); }
-
-    .card {
-      background: var(--card-bg); backdrop-filter: blur(25px) saturate(150%); -webkit-backdrop-filter: blur(25px) saturate(150%);
-      border-radius: 24px; border: 1px solid var(--card-border); box-shadow: 0 15px 50px 0 var(--shadow-color);
-      padding: 30px; animation: fadeIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
-      display: flex; flex-direction: column;
-      min-height: 600px; max-height: 90vh;
-    }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(20px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
-    .card-header { text-align: center; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid var(--card-border); flex-shrink: 0; }
-    #date-selector { background: none; border: none; color: var(--text-color-primary); font-size: 2.2em; font-weight: 700; text-align: center; cursor: pointer; }
-    #date-selector::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; transform: scale(1.2); }
-    #week-display { font-size: 1.2em; font-weight: 500; color: var(--text-color-secondary); margin-top: 8px; }
-
-    .homework-list {
-      list-style: none; padding: 0; margin: 0; display: flex;
-      flex-direction: column; gap: 15px;
-      flex-grow: 1;
-      overflow: auto;
-      padding: 5px; margin: 0 -5px;
-    }
-    .homework-item {
-      font-family: 'NumericAndLatinFont', 'ZCOOL KuaiLe', 'Noto Sans TC', sans-serif;
-      font-size: var(--item-font-size);
-      display: flex; align-items: center; gap: 15px;
-      padding: 12px; border-radius: var(--control-border-radius);
-      transition: background-color 0.2s ease; animation: itemFadeIn 0.5s ease forwards; position: relative;
-    }
-    .homework-item .item-content { flex-grow: 1; outline: none; }
-    .homework-item:hover, .homework-item:focus-within { background-color: rgba(0,0,0,0.2); }
-    .item-index { font-family: 'NumericAndLatinFont', 'Inter', sans-serif; font-weight: 600; color: var(--text-color-secondary); }
-
-    #homework-input-area {
-      display: flex; gap: 0; background-color: var(--input-bg);
-      border-radius: var(--control-border-radius); border: 1px solid rgba(255,255,255,0.1);
-      transition: box-shadow 0.3s ease; flex-shrink: 0; margin-top: 20px;
-    }
-    #homework-input-area:focus-within { box-shadow: 0 0 0 4px var(--primary-color); }
-    #new-homework-input { flex-grow: 1; background: none; border: none; padding: 14px 18px; font-size: 1.2em; color: var(--text-color-primary); font-family: 'NumericAndLatinFont', 'ZCOOL KuaiLe', sans-serif; }
-    #new-homework-input:focus { outline: none; }
-    button { border: none; font-weight: 600; cursor: pointer; transition: all 0.3s ease; border-radius: var(--control-border-radius) !important; padding: 14px 20px; }
-    #show-template-btn {
-      background: none; color: var(--text-color-secondary); font-size: 1.5em; padding: 0 15px;
-      flex-shrink: 0;
-    }
-    #show-template-btn:hover { color: var(--text-color-primary); }
-    .btn-primary { background: var(--primary-color); color: #1c1c1e; }
-    .btn-secondary { background: rgba(255,255,255,0.15); color: var(--text-color-primary); }
-    .delete-item-btn { opacity: 0; font-family: 'Inter', sans-serif; background: none; color: rgba(255,255,255,0.4); font-size: 1em; line-height: 1; transition: all 0.2s; }
-    .homework-item:hover .delete-item-btn { opacity: 1; }
-    .delete-item-btn:hover { color: var(--delete-color); transform: scale(1.1); }
-
-    .footer-buttons { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; margin-top: 30px; align-items: center; }
-    .footer-buttons button { font-size: 1em; padding: 12px 20px; flex-grow: 1; flex-basis: 150px; text-align: center; }
-    .font-slider-container { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.15); padding: 8px 15px; border-radius: var(--control-border-radius); flex-grow: 1; flex-basis: 150px; }
-    .font-slider-container label { font-family: 'ZCOOL KuaiLe', sans-serif; font-size: 1.2em; font-weight: 600; }
-    #font-size-slider { width: 100%; -webkit-appearance: none; background: transparent; }
-    #font-size-slider:focus { outline: none; }
-    #font-size-slider::-webkit-slider-runnable-track { height: 4px; background: rgba(0,0,0,0.5); border-radius: 5px; }
-    #font-size-slider::-webkit-slider-thumb { -webkit-appearance: none; height: 18px; width: 18px; background: var(--primary-color); border-radius: 50%; margin-top: -7px; cursor: pointer; }
-
-    /* C) 隱藏頁腳「Created by 方方老師」 */
-    .creator-credit { display: none !important; }
-
-    /* --- 直書模式核心樣式 --- */
-    .vertical-mode { flex-direction: row-reverse; align-items: flex-start; overflow-x: auto; overflow-y: hidden; gap: 20px; }
-    .vertical-mode .homework-item { display: flex; flex-direction: column; justify-content: space-between; align-items: stretch; width: auto; min-width: 100px; height: 98%; min-height: 400px; flex-shrink: 0; padding: 20px 15px; }
-    .vertical-mode .item-main-content { display: flex; flex-direction: column; align-items: center; width: 100%; overflow: hidden; }
-    .vertical-mode .item-index { border-bottom: 1px solid var(--text-color-secondary); padding-bottom: 10px; margin-bottom: 15px; }
-    .vertical-mode .item-content { writing-mode: vertical-rl; overflow-y: auto; text-align: right; max-height: 250px; width: auto; }
-    .vertical-mode .horizontal-in-vertical { writing-mode: horizontal-tb; display: inline-block; text-orientation: mixed; }
-    .vertical-mode .delete-item-btn { opacity: 1; padding: 5px; align-self: center; }
-    .vertical-mode > p { writing-mode: vertical-rl; text-orientation: upright; margin: 0 auto; align-self: center; }
-
-    /* --- 範本 Modal 樣式 --- */
-    #template-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 10; opacity: 0; transition: opacity 0.3s ease; }
-    #template-modal.visible { display: flex; opacity: 1; }
-    .template-card { padding: 30px; max-width: 800px; width: 90%; transform: scale(0.95); transition: transform 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28); }
-    #template-modal.visible .template-card { transform: scale(1); }
-    .category-tabs { display: flex; flex-wrap: wrap; gap: 10px; border-bottom: 1px solid var(--card-border); padding-bottom: 15px; margin-bottom: 20px; }
-    .tab-btn { background: rgba(0,0,0,0.2); color: var(--text-color-secondary); padding: 10px 15px; border-radius: 10px; font-weight: 600; }
-    .tab-btn.active { background: var(--primary-color); color: #1c1c1e; }
-    .templates-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; max-height: 45vh; overflow-y: auto; padding-right: 10px; font-family: 'NumericAndLatinFont', 'ZCOOL KuaiLe', sans-serif; }
-    .template-item { background: var(--input-bg); color: var(--text-color-primary); text-align: left; padding: 15px; border-radius: 10px; font-size: 1.2em; }
-    .template-item:hover { background: var(--primary-color); color: #1c1c1e; }
+    /* v20.2: 修正 keypress/IME、日期切換自動儲存、匯出防呆、動畫定義、一次性事件綁定 */
+    @font-face { font-family: 'NumericAndLatinFont'; src: local('Inter'), local('Noto Sans TC'), local('Arial'); unicode-range: U+0020-007F; }
+    :root { --primary-color:#87CEEB; --card-bg:rgba(80,80,80,.65); --card-border:rgba(255,255,255,.2); --text-color-primary:rgba(245,245,220,.95); --text-color-secondary:rgba(245,245,220,.6); --input-bg:rgba(0,0,0,.35); --shadow-color:rgba(0,0,0,.4); --control-border-radius:12px; --delete-color:#FF6347; --item-font-size:1.5em; }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0}
+    body{font-family:'Noto Sans TC',sans-serif;color:var(--text-color-primary);-webkit-font-smoothing:antialiased;background-image:url('https://www.transparenttextures.com/patterns/green-dust-and-scratches.png');background-color:#3D4A45;background-repeat:repeat;padding:20px 20px 70px;display:flex;align-items:center;justify-content:center}
+    .container{max-width:800px;width:100%}
+    .main-header{text-align:center;margin-bottom:25px}
+    .main-title{font-family:'ZCOOL KuaiLe',sans-serif;font-size:3em;font-weight:900;color:#fff;text-shadow:0 3px 15px rgba(0,0,0,.5)}
+    .card{background:var(--card-bg);backdrop-filter:blur(25px) saturate(150%);-webkit-backdrop-filter:blur(25px) saturate(150%);border-radius:24px;border:1px solid var(--card-border);box-shadow:0 15px 50px 0 var(--shadow-color);padding:30px;animation:fadeIn .8s cubic-bezier(.2,.8,.2,1);display:flex;flex-direction:column;min-height:600px;max-height:90vh}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(20px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+    @keyframes itemFadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+    .card-header{text-align:center;margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--card-border);flex-shrink:0}
+    #date-selector{background:none;border:none;color:var(--text-color-primary);font-size:2.2em;font-weight:700;text-align:center;cursor:pointer}
+    #date-selector::-webkit-calendar-picker-indicator{filter:invert(1);cursor:pointer;transform:scale(1.2)}
+    #week-display{font-size:1.2em;font-weight:500;color:var(--text-color-secondary);margin-top:8px}
+    .homework-list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:15px;flex-grow:1;overflow:auto;padding:5px;margin:0 -5px}
+    .homework-item{font-family:'NumericAndLatinFont','ZCOOL KuaiLe','Noto Sans TC',sans-serif;font-size:var(--item-font-size);display:flex;align-items:center;gap:15px;padding:12px;border-radius:var(--control-border-radius);transition:background-color .2s ease;animation:itemFadeIn .25s ease forwards;position:relative}
+    .homework-item .item-content{flex-grow:1;outline:none}
+    .homework-item:hover,.homework-item:focus-within{background-color:rgba(0,0,0,.2)}
+    .item-index{font-family:'NumericAndLatinFont','Inter',sans-serif;font-weight:600;color:var(--text-color-secondary)}
+    #homework-input-area{display:flex;gap:0;background-color:var(--input-bg);border-radius:var(--control-border-radius);border:1px solid rgba(255,255,255,.1);transition:box-shadow .3s ease;flex-shrink:0;margin-top:20px}
+    #homework-input-area:focus-within{box-shadow:0 0 0 4px var(--primary-color)}
+    #new-homework-input{flex-grow:1;background:none;border:none;padding:14px 18px;font-size:1.2em;color:var(--text-color-primary);font-family:'NumericAndLatinFont','ZCOOL KuaiLe',sans-serif}
+    #new-homework-input:focus{outline:none}
+    button{border:none;font-weight:600;cursor:pointer;transition:all .3s ease;border-radius:var(--control-border-radius)!important;padding:14px 20px}
+    #show-template-btn{background:none;color:var(--text-color-secondary);font-size:1.5em;padding:0 15px;flex-shrink:0}
+    #show-template-btn:hover{color:var(--text-color-primary)}
+    .btn-primary{background:var(--primary-color);color:#1c1c1e}
+    .btn-secondary{background:rgba(255,255,255,.15);color:var(--text-color-primary)}
+    .delete-item-btn{opacity:0;font-family:'Inter',sans-serif;background:none;color:rgba(255,255,255,.4);font-size:1em;line-height:1;transition:all .2s}
+    .homework-item:hover .delete-item-btn{opacity:1}
+    .delete-item-btn:hover{color:var(--delete-color);transform:scale(1.1)}
+    .footer-buttons{display:flex;flex-wrap:wrap;justify-content:center;gap:15px;margin-top:30px;align-items:center}
+    .footer-buttons button{font-size:1em;padding:12px 20px;flex-grow:1;flex-basis:150px;text-align:center}
+    .font-slider-container{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.15);padding:8px 15px;border-radius:var(--control-border-radius);flex-grow:1;flex-basis:150px}
+    .font-slider-container label{font-family:'ZCOOL KuaiLe',sans-serif;font-size:1.2em;font-weight:600}
+    #font-size-slider{width:100%;-webkit-appearance:none;background:transparent}
+    #font-size-slider:focus{outline:none}
+    #font-size-slider::-webkit-slider-runnable-track{height:4px;background:rgba(0,0,0,.5);border-radius:5px}
+    #font-size-slider::-webkit-slider-thumb{-webkit-appearance:none;height:18px;width:18px;background:var(--primary-color);border-radius:50%;margin-top:-7px;cursor:pointer}
+    /* 隱藏作者標記（頁面與匯出檔都不顯示） */
+    .creator-credit{display:none!important}
+    /* 直書模式 */
+    .vertical-mode{flex-direction:row-reverse;align-items:flex-start;overflow-x:auto;overflow-y:hidden;gap:20px}
+    .vertical-mode .homework-item{display:flex;flex-direction:column;justify-content:space-between;align-items:stretch;width:auto;min-width:100px;height:98%;min-height:400px;flex-shrink:0;padding:20px 15px}
+    .vertical-mode .item-main-content{display:flex;flex-direction:column;align-items:center;width:100%;overflow:hidden}
+    .vertical-mode .item-index{border-bottom:1px solid var(--text-color-secondary);padding-bottom:10px;margin-bottom:15px}
+    .vertical-mode .item-content{writing-mode:vertical-rl;overflow-y:auto;text-align:right;max-height:250px;width:auto}
+    .vertical-mode .horizontal-in-vertical{writing-mode:horizontal-tb;display:inline-block;text-orientation:mixed}
+    .vertical-mode .delete-item-btn{opacity:1;padding:5px;align-self:center}
+    .vertical-mode>p{writing-mode:vertical-rl;text-orientation:upright;margin:0 auto;align-self:center}
+    /* 範本 Modal */
+    #template-modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);background:rgba(0,0,0,.5);align-items:center;justify-content:center;z-index:10;opacity:0;transition:opacity .3s ease}
+    #template-modal.visible{display:flex;opacity:1}
+    .template-card{padding:30px;max-width:800px;width:90%;transform:scale(.95);transition:transform .3s cubic-bezier(.18,.89,.32,1.28)}
+    #template-modal.visible .template-card{transform:scale(1)}
+    .category-tabs{display:flex;flex-wrap:wrap;gap:10px;border-bottom:1px solid var(--card-border);padding-bottom:15px;margin-bottom:20px}
+    .tab-btn{background:rgba(0,0,0,.2);color:var(--text-color-secondary);padding:10px 15px;border-radius:10px;font-weight:600}
+    .tab-btn.active{background:var(--primary-color);color:#1c1c1e}
+    .templates-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;max-height:45vh;overflow-y:auto;padding-right:10px;font-family:'NumericAndLatinFont','ZCOOL KuaiLe',sans-serif}
+    .template-item{background:var(--input-bg);color:var(--text-color-primary);text-align:left;padding:15px;border-radius:10px;font-size:1.2em}
+    .template-item:hover{background:var(--primary-color);color:#1c1c1e}
   </style>
-<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 </head>
 <body>
   <div class="container">
@@ -154,313 +96,233 @@
     </div>
   </div>
   <div id="template-modal"><div class="card template-card"><h2>選擇作業範本</h2><div id="category-tabs" class="category-tabs"></div><div id="templates-grid" class="templates-grid"></div></div></div>
-  <!-- 原本的頁腳作者標記：已在 CSS 以 display:none 隱藏，並在 JS 載入時移除節點以避免匯出帶出。 -->
   <a href="https://www.facebook.com/FunFun.AI.Teacher/" target="_blank" rel="noopener noreferrer" class="creator-credit">Created by 方方老師</a>
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      // 若存在作者標記，移除（同時 CSS 亦已隱藏）
+      // 移除作者標記
       document.querySelector('.creator-credit')?.remove();
 
-      // DOM Elements
-      const dateSelector = document.getElementById('date-selector');
-      const weekDisplay = document.getElementById('week-display');
-      const homeworkList = document.getElementById('homework-list');
-      const newHomeworkInput = document.getElementById('new-homework-input');
-      const exportHtmlBtn = document.getElementById('export-html-btn');
-      const exportPngBtn = document.getElementById('export-png-btn');
-      const exportFullPngBtn = document.getElementById('export-fullpng-btn');
-      const togglePresentationBtn = document.getElementById('toggle-presentation-btn');
-      const toggleVerticalBtn = document.getElementById('toggle-vertical-btn');
-      const fontSizeSlider = document.getElementById('font-size-slider');
+      // 工具
+      const $ = s => document.querySelector(s);
+      const $$ = s => Array.from(document.querySelectorAll(s));
 
-      // State
+      // DOM
+      const dateSelector = $('#date-selector');
+      const weekDisplay = $('#week-display');
+      const homeworkList = $('#homework-list');
+      const newHomeworkInput = $('#new-homework-input');
+      const exportHtmlBtn = $('#export-html-btn');
+      const exportPngBtn = $('#export-png-btn');
+      const exportFullPngBtn = $('#export-fullpng-btn');
+      const togglePresentationBtn = $('#toggle-presentation-btn');
+      const toggleVerticalBtn = $('#toggle-vertical-btn');
+      const fontSizeSlider = $('#font-size-slider');
+
+      // 狀態
       const today = new Date();
-      const pad = n => String(n).padStart(2, '0');
-      let currentDate = `${today.getFullYear()}-${pad(today.getMonth()+1)}-${pad(today.getDate())}`; // 使用本地時區避免 UTC 跨日
+      const pad = n => String(n).padStart(2,'0');
+      let currentDate = `${today.getFullYear()}-${pad(today.getMonth()+1)}-${pad(today.getDate())}`; // 本地時區
       let isPresentationMode = false;
       let isVerticalMode = false;
+      let allData = {}; // 放各日期的事項
 
+      // 範本
       const templates = {
-        "國語文": ["國習 L__", "國語習作 p.__-`__`", "甲本 p.__-`__`", "生字本 L__", "語詞本 L__", "國練 第__回", "圈詞 L__ 寫__遍", "背書 L__", "默書 L__", "日記", "閱讀心得"],
-        "數學": ["數習 p.__-`__`", "數練 第__回", "數作 p.__-`__`", "計算練習本 p.__", "數卷訂簽", "應用題 x__"],
-        "英語": ["英習 U__", "英聽", "單字 U__ 寫__遍", "背單字 U__", "句型練習 x__", "課文朗讀 U__"],
-        "社會自然": ["社習 p.__-`__`", "自習 p.__-`__`", "社卷訂簽", "自卷訂簽", "學習單", "報告：__", "觀察紀錄：__"],
-        "通用": ["考卷訂簽", "複習 L__-`__`", "預習 L__", "發回條", "帶__", "做家事", "運動30分鐘", "親子共讀"]
+        "國語文":["國習 L__","國語習作 p.__-`__`","甲本 p.__-`__`","生字本 L__","語詞本 L__","國練 第__回","圈詞 L__ 寫__遍","背書 L__","默書 L__","日記","閱讀心得"],
+        "數學":["數習 p.__-`__`","數練 第__回","數作 p.__-`__`","計算練習本 p.__","數卷訂簽","應用題 x__"],
+        "英語":["英習 U__","英聽","單字 U__ 寫__遍","背單字 U__","句型練習 x__","課文朗讀 U__"],
+        "社會自然":["社習 p.__-`__`","自習 p.__-`__`","社卷訂簽","自卷訂簽","學習單","報告：__","觀察紀錄：__"],
+        "通用":["考卷訂簽","複習 L__-`__`","預習 L__","發回條","帶__","做家事","運動30分鐘","親子共讀"]
       };
 
-      // --- Data Functions ---
+      // 儲存與載入
+      const getCurrentItems = () => $$('.item-content').map(el => el.textContent.trim()).filter(Boolean);
       const saveData = () => { allData[currentDate] = getCurrentItems(); localStorage.setItem('ultraContactBook_v20_final', JSON.stringify(allData)); };
-      const loadData = () => { const data = JSON.parse(localStorage.getItem('ultraContactBook_v20_final')); if (data) allData = data; loadDataForDate(currentDate); };
+      const loadData = () => { try { const data = JSON.parse(localStorage.getItem('ultraContactBook_v20_final')); if (data && typeof data === 'object') allData = data; } catch(e){} loadDataForDate(currentDate); };
       const loadDataForDate = (date) => { renderHomeworkList(allData[date] || []); };
-      const getCurrentItems = () => Array.from(homeworkList.querySelectorAll('.item-content')).map(el => el.textContent.trim()).filter(text => text);
 
-      // --- UI Functions ---
+      // UI
       const updateDate = (dateString) => {
-        const date = new Date(dateString + 'T00:00:00');
-        const week = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'][date.getDay()];
+        const d = new Date(dateString + 'T00:00:00');
+        const week = ['星期日','星期一','星期二','星期三','星期四','星期五','星期六'][d.getDay()];
         weekDisplay.textContent = week;
         dateSelector.value = dateString;
       };
-
       const processTextForVertical = (text) => {
         const regex = /([a-zA-Z0-9\s._'-]+)/g;
-        return text.split(regex).map(segment => {
-          if (segment.match(regex) && segment.trim() !== '') {
-            return `<span class="horizontal-in-vertical">${segment}</span>`;
-          }
-          return `<span>${segment}</span>`;
-        }).join('');
+        return text.split(regex).map(seg => seg.match(regex) && seg.trim()!=='' ? `<span class="horizontal-in-vertical">${seg}</span>` : `<span>${seg}</span>`).join('');
       };
-
       const renderHomeworkList = (items) => {
         homeworkList.innerHTML = '';
         if (!items || items.length === 0) {
-          homeworkList.innerHTML = `<p style="font-family: 'Noto Sans TC', sans-serif; font-size: 1rem; text-align: center; margin: auto;">點擊下方輸入框新增今日聯絡事項</p>`;
-        } else {
-          items.forEach((itemText, index) => {
-            const li = document.createElement('li');
-            li.className = 'homework-item';
-            const contentHTML = isVerticalMode ? processTextForVertical(itemText) : itemText;
-            li.innerHTML = `
-              <div class="item-main-content">
-                <span class="item-index">${index + 1}.</span>
-                <span class="item-content" contenteditable="true">${contentHTML}</span>
-              </div>
-              <button class="delete-item-btn">&times;</button>
-            `;
-            homeworkList.appendChild(li);
-          });
+          homeworkList.innerHTML = `<p style="font-family:'Noto Sans TC',sans-serif;font-size:1rem;text-align:center;margin:auto;">點擊下方輸入框新增今日聯絡事項</p>`;
+          return;
         }
+        items.forEach((text, idx) => {
+          const li = document.createElement('li');
+          li.className = 'homework-item';
+          const contentHTML = isVerticalMode ? processTextForVertical(text) : text;
+          li.innerHTML = `
+            <div class="item-main-content">
+              <span class="item-index">${idx+1}.</span>
+              <span class="item-content" contenteditable="true">${contentHTML}</span>
+            </div>
+            <button class="delete-item-btn" title="刪除">&times;</button>
+          `;
+          homeworkList.appendChild(li);
+        });
       };
 
       const addHomework = (text) => {
-        text = text.trim();
-        if (text) {
-          let currentItems = getCurrentItems();
-          currentItems.push(text);
-          renderHomeworkList(currentItems);
-          saveData();
-        }
+        const t = (text||'').trim();
+        if (!t) return;
+        const arr = getCurrentItems();
+        arr.push(t);
+        renderHomeworkList(arr);
+        saveData();
         newHomeworkInput.value = '';
         newHomeworkInput.focus();
       };
 
-      // --- Mode Toggles ---
+      // 模式切換
       const togglePresentation = () => {
         isPresentationMode = !isPresentationMode;
         document.body.classList.toggle('presentation-mode', isPresentationMode);
         togglePresentationBtn.textContent = isPresentationMode ? '返回編輯' : '全螢幕展示';
-        if (isPresentationMode) {
-          document.documentElement.requestFullscreen?.();
-        } else {
-          if (document.fullscreenElement) document.exitFullscreen?.();
-        }
+        if (isPresentationMode) document.documentElement.requestFullscreen?.();
+        else if (document.fullscreenElement) document.exitFullscreen?.();
       };
-
       const toggleVertical = () => {
         isVerticalMode = !isVerticalMode;
         homeworkList.classList.toggle('vertical-mode', isVerticalMode);
         toggleVerticalBtn.textContent = isVerticalMode ? '切換橫書' : '切換直書';
         renderHomeworkList(getCurrentItems());
       };
-
       const applyAndSaveFontSize = (size) => { document.documentElement.style.setProperty('--item-font-size', `${size}em`); localStorage.setItem('fontSizePreference_v20', size); };
-      const loadPreferences = () => { const savedSize = localStorage.getItem('fontSizePreference_v20'); if (savedSize) { fontSizeSlider.value = savedSize; applyAndSaveFontSize(savedSize); } };
+      const loadPreferences = () => { const s = localStorage.getItem('fontSizePreference_v20'); if (s) { fontSizeSlider.value = s; applyAndSaveFontSize(s); } };
 
-      // --- Template Modal ---
+      // 範本 Modal
       const initTemplateModal = () => {
-        const modal = document.getElementById('template-modal');
-        const showTemplateBtn = document.getElementById('show-template-btn');
-        const categoryTabs = document.getElementById('category-tabs');
-        const templatesGrid = document.getElementById('templates-grid');
+        const modal = $('#template-modal');
+        const showTemplateBtn = $('#show-template-btn');
+        const categoryTabs = $('#category-tabs');
+        const templatesGrid = $('#templates-grid');
         let isInitialized = false;
-
         const show = () => modal.classList.add('visible');
         const hide = () => modal.classList.remove('visible');
-
-        const renderTemplatesForCategory = (category) => {
-          categoryTabs.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-          categoryTabs.querySelector(`.tab-btn[data-category="${category}"]`).classList.add('active');
-          templatesGrid.innerHTML = '';
-          templates[category].forEach(templateText => {
-            const item = document.createElement('button');
-            item.className = 'template-item';
-            item.textContent = templateText;
-            item.onclick = () => { addHomework(templateText); hide(); };
-            templatesGrid.appendChild(item);
+        const renderCategory = (cat) => {
+          categoryTabs.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+          categoryTabs.querySelector(`.tab-btn[data-category="${cat}"]`)?.classList.add('active');
+          templatesGrid.innerHTML='';
+          (templates[cat]||[]).forEach(t => {
+            const btn = document.createElement('button');
+            btn.className = 'template-item';
+            btn.textContent = t;
+            btn.onclick = () => { addHomework(t); hide(); };
+            templatesGrid.appendChild(btn);
           });
         };
-
         showTemplateBtn.addEventListener('click', () => {
           if (!isInitialized) {
-            Object.keys(templates).forEach((category) => {
+            Object.keys(templates).forEach(cat => {
               const tab = document.createElement('button');
-              tab.className = 'tab-btn';
-              tab.textContent = category;
-              tab.dataset.category = category;
-              tab.onclick = () => renderTemplatesForCategory(category);
+              tab.className='tab-btn'; tab.textContent = cat; tab.dataset.category = cat;
+              tab.onclick = () => renderCategory(cat);
               categoryTabs.appendChild(tab);
             });
-            renderTemplatesForCategory(Object.keys(templates)[0]);
+            renderCategory(Object.keys(templates)[0]);
             isInitialized = true;
           }
           show();
         });
-        modal.addEventListener('click', (e) => { if (e.target === modal) hide(); });
+        modal.addEventListener('click', e => { if (e.target === modal) hide(); });
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') hide(); });
       };
 
-      // --- Event Delegation ---
-      const allItemsNodeList = () => Array.from(homeworkList.querySelectorAll('.homework-item'));
-      homeworkList.addEventListener('click', (e) => {
+      // 事件委派：刪除 / 編輯儲存 / Enter 行為
+      homeworkList.addEventListener('click', e => {
         if (e.target.classList.contains('delete-item-btn')) {
-          const itemElement = e.target.closest('.homework-item');
-          const index = allItemsNodeList().indexOf(itemElement);
-          let currentItems = getCurrentItems();
-          currentItems.splice(index, 1);
-          renderHomeworkList(currentItems);
+          const item = e.target.closest('.homework-item');
+          const idx = $$('.homework-item').indexOf(item);
+          const arr = getCurrentItems();
+          arr.splice(idx,1);
+          renderHomeworkList(arr);
           saveData();
         }
       });
+      homeworkList.addEventListener('focusout', e => { if (e.target.classList.contains('item-content')) saveData(); });
+      homeworkList.addEventListener('keydown', e => {
+        if (e.target.classList.contains('item-content') && e.key === 'Enter' && !e.isComposing) { e.preventDefault(); e.target.blur(); }
+      });
 
-      homeworkList.addEventListener('focusout', (e) => { if (e.target.classList.contains('item-content')) { saveData(); } });
-      homeworkList.addEventListener('keydown', (e) => { if (e.target.classList.contains('item-content') && e.key === 'Enter') { e.preventDefault(); e.target.blur(); } });
-
-      // --- Initial Setup ---
+      // 初始化
       updateDate(currentDate);
-      let allData = {};
       loadData();
       loadPreferences();
       initTemplateModal();
 
-      newHomeworkInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') { addHomework(newHomeworkInput.value); } });
-      dateSelector.addEventListener('change', (e) => { currentDate = e.target.value; updateDate(currentDate); loadDataForDate(currentDate); });
+      // 新增事項：處理中文輸入法 Enter
+      newHomeworkInput.addEventListener('keydown', e => { if (e.key==='Enter' && !e.isComposing) { e.preventDefault(); addHomework(newHomeworkInput.value); } });
 
-      // 【核心】修正匯出按鈕功能：不再以 .replace(/url\(.*\)/) 破壞 CSS
+      // 切換日期：先儲存當前再切換
+      dateSelector.addEventListener('change', e => { saveData(); currentDate = e.target.value; updateDate(currentDate); loadDataForDate(currentDate); });
+
+      // 匯出 HTML（保留原樣式，移除 @import）
       if (exportHtmlBtn) {
         exportHtmlBtn.addEventListener('click', () => {
-        const d = new Date(dateSelector.value + 'T00:00:00');
-        const ts = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-        const filename = `聯絡簿_${ts}.html`;
-        const dateHTML = dateSelector.value.replace(/-/g, ' / ');
-        const weekHTML = weekDisplay.innerHTML;
-        let homeworkHTML = '';
-        getCurrentItems().forEach((item, index) => { if(item.trim()) homeworkHTML += `<li class="homework-item"><span class="item-index">${index + 1}.</span><span class="item-content">${item}</span></li>`; });
+          const d = new Date(dateSelector.value + 'T00:00:00');
+          const ts = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+          const filename = `聯絡簿_${ts}.html`;
+          const dateHTML = dateSelector.value.replace(/-/g,' / ');
+          const weekHTML = weekDisplay.innerHTML;
+          let homeworkHTML = '';
+          getCurrentItems().forEach((item, i) => { if(item) homeworkHTML += `<li class="homework-item"><span class="item-index">${i+1}.</span><span class="item-content">${item}</span></li>`; });
+          const rawCss = document.querySelector('style').innerHTML;
+          const cssNoImport = rawCss.replace(/^[ \t]*@import[^;]+;[ \t]*$/gmi,'');
+          const exportedCss = cssNoImport + `.exported-header{display:flex;justify-content:space-between;align-items:center}.exported-btn{background:var(--primary-color);color:#fff;padding:10px 18px;border-radius:10px;border:none;font-size:1em;cursor:pointer}`;
+          const exportedJs = `<script>document.addEventListener('DOMContentLoaded',()=>{const b=document.getElementById('fullscreen-btn');b.addEventListener('click',()=>{if(!document.fullscreenElement){document.documentElement.requestFullscreen?.();b.textContent='結束全螢幕'}else{document.exitFullscreen?.();b.textContent='全螢幕展示'}});});<\/script>`;
+          const html = `<!DOCTYPE html><html lang="zh-TW"><head><meta charset="UTF-8"><title>${filename}</title><style>${exportedCss}</style></head><body><div class="container"><div class="exported-header"><h1 class="main-title">智慧聯絡簿</h1><button id=\"fullscreen-btn\" class=\"exported-btn\">全螢幕展示</button></div><div class="card"><div class="card-header"><div style=\"font-size:2.2em;font-weight:700;\">${dateHTML}</div><div style=\"font-size:1.2em;color:var(--text-color-secondary);\">${weekHTML}</div></div><ul class="homework-list">${homeworkHTML}</ul></div></div>${exportedJs}</body></html>`;
+          const a = document.createElement('a');
+          a.href = 'data:text/html;charset=utf-8,' + encodeURIComponent(html);
+          a.download = filename;
+          a.click();
+        });
       }
 
-        // 將目前 <style> 內容取出，乾淨移除任何 @import 行（避免外連在匯出檔），保留本地樣式
-        const rawCss = document.querySelector('style').innerHTML;
-        const cssNoImport = rawCss.replace(/^[ \t]*@import[^;]+;[ \t]*$/gmi, '');
-        const exportedCss = cssNoImport + `
-          .exported-header{display:flex;justify-content:space-between;align-items:center;}
-          .exported-btn{background:var(--primary-color);color:white;padding:10px 18px;border-radius:10px;border:none;font-size:1em;cursor:pointer;}
-        `;
-
-        const exportedJs = `
-          <script>
-            document.addEventListener('DOMContentLoaded', () => {
-              const btn = document.getElementById('fullscreen-btn');
-              btn.addEventListener('click', () => {
-                if (!document.fullscreenElement) {
-                  document.documentElement.requestFullscreen?.();
-                  btn.textContent = '結束全螢幕';
-                } else {
-                  document.exitFullscreen?.();
-                  btn.textContent = '全螢幕展示';
-                }
-              });
-            });
-          <\/script>
-        `;
-
-        const htmlContent = `<!DOCTYPE html><html lang="zh-TW"><head><meta charset="UTF-8"><title>${filename}</title><style>${exportedCss}</style></head><body><div class="container"><div class="exported-header"><h1 class="main-title">智慧聯絡簿</h1><button id=\"fullscreen-btn\" class=\"exported-btn\">全螢幕展示</button></div><div class="card"><div class="card-header"><div id="date-display" style="font-size:2.2em;font-weight:700;">${dateHTML}</div><div id="week-display" style="font-size:1.2em;color:var(--text-color-secondary);">${weekHTML}</div></div><ul class="homework-list">${homeworkHTML}</ul></div></div>${exportedJs}</body></html>`;
-
-        const link = document.createElement('a');
-        link.href = 'data:text/html;charset=utf-8,' + encodeURIComponent(htmlContent);
-        link.download = filename;
-        link.click();
-      });
-
-      // 匯出 PNG 圖片
+      // 匯出卡片 PNG
       exportPngBtn.addEventListener('click', async () => {
+        if (typeof html2canvas !== 'function') return alert('匯出模組未載入，請檢查網路');
         const d = new Date(dateSelector.value + 'T00:00:00');
         const ts = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-        const oldText = exportPngBtn.textContent;
-        exportPngBtn.disabled = true;
-        exportPngBtn.textContent = '匯出中…';
-        try {
-          const node = document.getElementById('main-card');
-          const canvas = await html2canvas(node, {
-            scale: Math.min(window.devicePixelRatio || 1, 3),
-            useCORS: true,
-            backgroundColor: null,
-            logging: false,
-            onclone: (doc) => {
-              const cloneCard = doc.querySelector('#main-card');
-              if (cloneCard) {
-                cloneCard.style.maxHeight = 'none';
-                const list = cloneCard.querySelector('#homework-list');
-                if (list) list.style.overflow = 'visible';
-              }
-            }
-          });
-          const a = document.createElement('a');
-          a.download = `聯絡簿_${ts}.png`;
-          a.href = canvas.toDataURL('image/png');
-          a.click();
-        } catch (e) {
-          alert('匯出圖片失敗：' + (e?.message || e));
-        } finally {
-          exportPngBtn.disabled = false;
-          exportPngBtn.textContent = oldText;
-        }
+        const old = exportPngBtn.textContent; exportPngBtn.disabled = true; exportPngBtn.textContent = '匯出中…';
+        try{
+          const node = $('#main-card');
+          const canvas = await html2canvas(node,{ scale:Math.min(window.devicePixelRatio||1,3), useCORS:true, backgroundColor:null, logging:false, onclone:(doc)=>{ const c=doc.querySelector('#main-card'); if(c){ c.style.maxHeight='none'; const list=c.querySelector('#homework-list'); if(list) list.style.overflow='visible'; } } });
+          const a=document.createElement('a'); a.download=`聯絡簿_${ts}.png`; a.href=canvas.toDataURL('image/png'); a.click();
+        }catch(e){ alert('匯出圖片失敗：'+(e?.message||e)); }
+        finally{ exportPngBtn.disabled=false; exportPngBtn.textContent=old; }
       });
 
-      togglePresentationBtn.addEventListener('click', togglePresentation);
-      document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement && isPresentationMode) { togglePresentation(); } });
-      // 匯出整頁 PNG（不含外部背景圖，避免跨來源）
+      // 匯出整頁 PNG（純色背景，避免外部背景 CORS）
       exportFullPngBtn.addEventListener('click', async () => {
+        if (typeof html2canvas !== 'function') return alert('匯出模組未載入，請檢查網路');
         const d = new Date(dateSelector.value + 'T00:00:00');
         const ts = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-        const oldText = exportFullPngBtn.textContent;
-        exportFullPngBtn.disabled = true;
-        exportFullPngBtn.textContent = '匯出中…';
-        try {
-          const node = document.querySelector('.container');
-          const canvas = await html2canvas(node, {
-            scale: Math.min(window.devicePixelRatio || 1, 2.5),
-            useCORS: true,
-            backgroundColor: '#3D4A45',
-            logging: false,
-            onclone: (doc) => {
-              // 移除外部背景圖片，避免 CORS 造成畫布污染
-              doc.body.style.backgroundImage = 'none';
-              doc.body.style.background = '#3D4A45';
-              const cloneCard = doc.querySelector('#main-card');
-              if (cloneCard) {
-                cloneCard.style.maxHeight = 'none';
-                const list = cloneCard.querySelector('#homework-list');
-                if (list) list.style.overflow = 'visible';
-              }
-              // 確保彈窗關閉不佔空間
-              const modal = doc.getElementById('template-modal');
-              if (modal) modal.classList.remove('visible');
-            }
-          });
-          const a2 = document.createElement('a');
-          a2.download = `聯絡簿整頁_${ts}.png`;
-          a2.href = canvas.toDataURL('image/png');
-          a2.click();
-        } catch (e) {
-          alert('匯出整頁圖片失敗：' + (e?.message || e));
-        } finally {
-          exportFullPngBtn.disabled = false;
-          exportFullPngBtn.textContent = oldText;
-        }
+        const old = exportFullPngBtn.textContent; exportFullPngBtn.disabled = true; exportFullPngBtn.textContent = '匯出中…';
+        try{
+          const node = $('.container');
+          const canvas = await html2canvas(node,{ scale:Math.min(window.devicePixelRatio||1,2.5), useCORS:true, backgroundColor:'#3D4A45', logging:false, onclone:(doc)=>{ doc.body.style.backgroundImage='none'; doc.body.style.background='#3D4A45'; const c=doc.querySelector('#main-card'); if(c){ c.style.maxHeight='none'; const list=c.querySelector('#homework-list'); if(list) list.style.overflow='visible'; } const modal=doc.getElementById('template-modal'); if(modal) modal.classList.remove('visible'); } });
+          const a=document.createElement('a'); a.download=`聯絡簿整頁_${ts}.png`; a.href=canvas.toDataURL('image/png'); a.click();
+        }catch(e){ alert('匯出整頁圖片失敗：'+(e?.message||e)); }
+        finally{ exportFullPngBtn.disabled=false; exportFullPngBtn.textContent=old; }
       });
 
+      // 其他控制
+      togglePresentationBtn.addEventListener('click', togglePresentation);
+      document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement && isPresentationMode) togglePresentation(); });
       toggleVerticalBtn.addEventListener('click', toggleVertical);
-      fontSizeSlider.addEventListener('input', (e) => applyAndSaveFontSize(e.target.value));
+      fontSizeSlider.addEventListener('input', e => applyAndSaveFontSize(e.target.value));
     });
   </script>
 </body>
