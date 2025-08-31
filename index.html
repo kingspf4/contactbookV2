@@ -150,7 +150,8 @@
         dateSelector.value = dateString;
       };
       const processTextForVertical = (text) => {
-        const regex = /([a-zA-Z0-9\s._'-]+)/g;
+        // 修正：含 `（backtick）也走橫排；- 放在集合尾端避免範圍歧義
+        const regex = /([a-zA-Z0-9\s._'`-]+)/g;
         return text.split(regex).map(seg => seg.match(regex) && seg.trim()!=='' ? `<span class="horizontal-in-vertical">${seg}</span>` : `<span>${seg}</span>`).join('');
       };
       const renderHomeworkList = (items) => {
@@ -262,6 +263,9 @@
       loadPreferences();
       initTemplateModal();
 
+      // 若某些瀏覽器初次載入 <input type="date"> 值為空，補上當天日期
+      const ensureDate = () => { if (!dateSelector.value) { dateSelector.value = currentDate; } };
+
       // 新增事項：處理中文輸入法 Enter
       newHomeworkInput.addEventListener('keydown', e => { if (e.key==='Enter' && !e.isComposing) { e.preventDefault(); addHomework(newHomeworkInput.value); } });
 
@@ -271,6 +275,7 @@
       // 匯出 HTML（保留原樣式，移除 @import）
       if (exportHtmlBtn) {
         exportHtmlBtn.addEventListener('click', () => {
+          ensureDate(); // 安全檢查
           const d = new Date(dateSelector.value + 'T00:00:00');
           const ts = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
           const filename = `聯絡簿_${ts}.html`;
@@ -286,12 +291,15 @@
           const a = document.createElement('a');
           a.href = 'data:text/html;charset=utf-8,' + encodeURIComponent(html);
           a.download = filename;
+          document.body.appendChild(a);
           a.click();
+          a.remove();
         });
       }
 
       // 匯出卡片 PNG
       exportPngBtn.addEventListener('click', async () => {
+        ensureDate(); // 安全檢查
         if (typeof html2canvas !== 'function') return alert('匯出模組未載入，請檢查網路');
         const d = new Date(dateSelector.value + 'T00:00:00');
         const ts = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
@@ -299,13 +307,14 @@
         try{
           const node = $('#main-card');
           const canvas = await html2canvas(node,{ scale:Math.min(window.devicePixelRatio||1,3), useCORS:true, backgroundColor:null, logging:false, onclone:(doc)=>{ const c=doc.querySelector('#main-card'); if(c){ c.style.maxHeight='none'; const list=c.querySelector('#homework-list'); if(list) list.style.overflow='visible'; } } });
-          const a=document.createElement('a'); a.download=`聯絡簿_${ts}.png`; a.href=canvas.toDataURL('image/png'); a.click();
+          const a=document.createElement('a'); a.download=`聯絡簿_${ts}.png`; a.href=canvas.toDataURL('image/png'); document.body.appendChild(a); a.click(); a.remove();
         }catch(e){ alert('匯出圖片失敗：'+(e?.message||e)); }
         finally{ exportPngBtn.disabled=false; exportPngBtn.textContent=old; }
       });
 
       // 匯出整頁 PNG（純色背景，避免外部背景 CORS）
       exportFullPngBtn.addEventListener('click', async () => {
+        ensureDate(); // 安全檢查
         if (typeof html2canvas !== 'function') return alert('匯出模組未載入，請檢查網路');
         const d = new Date(dateSelector.value + 'T00:00:00');
         const ts = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
@@ -313,7 +322,7 @@
         try{
           const node = $('.container');
           const canvas = await html2canvas(node,{ scale:Math.min(window.devicePixelRatio||1,2.5), useCORS:true, backgroundColor:'#3D4A45', logging:false, onclone:(doc)=>{ doc.body.style.backgroundImage='none'; doc.body.style.background='#3D4A45'; const c=doc.querySelector('#main-card'); if(c){ c.style.maxHeight='none'; const list=c.querySelector('#homework-list'); if(list) list.style.overflow='visible'; } const modal=doc.getElementById('template-modal'); if(modal) modal.classList.remove('visible'); } });
-          const a=document.createElement('a'); a.download=`聯絡簿整頁_${ts}.png`; a.href=canvas.toDataURL('image/png'); a.click();
+          const a=document.createElement('a'); a.download=`聯絡簿整頁_${ts}.png`; a.href=canvas.toDataURL('image/png'); document.body.appendChild(a); a.click(); a.remove();
         }catch(e){ alert('匯出整頁圖片失敗：'+(e?.message||e)); }
         finally{ exportFullPngBtn.disabled=false; exportFullPngBtn.textContent=old; }
       });
