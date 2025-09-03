@@ -3,17 +3,34 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>智慧聯絡簿 v20.3（功能強化：拖曳排序／JSON 匯入匯出／複製文字）</title>
+  <title>智慧聯絡簿 v20.4（白字＋高對比實色匯圖）</title>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <style>
-    /* v20.3: 新增拖曳排序、JSON 匯入匯出、複製純文字、清空今日、安全貼上、下載穩定、日期防呆 */
+    /* v20.4: 全站白字、PNG 實色底、更高對比；保留拖曳排序／JSON 匯入匯出／複製文字／複製前日等功能 */
     @font-face { font-family: 'NumericAndLatinFont'; src: local('Inter'), local('Noto Sans TC'), local('Arial'); unicode-range: U+0020-007F; }
-    :root { --primary-color:#87CEEB; --card-bg:rgba(80,80,80,.65); --card-border:rgba(255,255,255,.2); --text-color-primary:rgba(245,245,220,.95); --text-color-secondary:rgba(245,245,220,.6); --input-bg:rgba(0,0,0,.35); --shadow-color:rgba(0,0,0,.4); --control-border-radius:12px; --delete-color:#FF6347; --item-font-size:1.5em; --danger:#ff5c5c; }
+    :root{
+      --primary-color:#87CEEB;
+      --card-bg:rgba(80,80,80,.65);
+      --card-border:rgba(255,255,255,.2);
+      --text-color-primary:#fff;                 /* ← 改為純白 */
+      --text-color-secondary:rgba(255,255,255,.75);/* ← 次要白 */
+      --input-bg:rgba(0,0,0,.35);
+      --shadow-color:rgba(0,0,0,.4);
+      --control-border-radius:12px;
+      --delete-color:#FF6347;
+      --item-font-size:1.5em;
+      --danger:#ff5c5c;
+    }
     *{box-sizing:border-box}
     html,body{height:100%;margin:0}
-    body{font-family:'Noto Sans TC',sans-serif;color:var(--text-color-primary);-webkit-font-smoothing:antialiased;background-image:url('https://www.transparenttextures.com/patterns/green-dust-and-scratches.png');background-color:#3D4A45;background-repeat:repeat;padding:20px 20px 90px;display:flex;align-items:center;justify-content:center}
+    body{
+      font-family:'Noto Sans TC',sans-serif;color:var(--text-color-primary);-webkit-font-smoothing:antialiased;
+      background-image:url('https://www.transparenttextures.com/patterns/green-dust-and-scratches.png');
+      background-color:#3D4A45;background-repeat:repeat;
+      padding:20px 20px 90px;display:flex;align-items:center;justify-content:center
+    }
     .container{max-width:900px;width:100%}
     .main-header{text-align:center;margin-bottom:25px}
     .main-title{font-family:'ZCOOL KuaiLe',sans-serif;font-size:3em;font-weight:900;color:#fff;text-shadow:0 3px 15px rgba(0,0,0,.5)}
@@ -120,6 +137,7 @@
       <button id="export-fullpng-btn" class="btn-secondary">匯出整頁（PNG）</button>
 
       <button id="copy-text-btn" class="btn-secondary">複製文字</button>
+      <button id="copy-prev-btn" class="btn-secondary">複製前日</button>
       <button id="export-json-btn" class="btn-secondary">匯出 JSON</button>
       <button id="import-json-btn" class="btn-secondary">匯入 JSON</button>
       <button id="clear-today-btn" class="btn-danger">清空今日</button>
@@ -145,6 +163,7 @@
       const exportPngBtn = $('#export-png-btn');
       const exportFullPngBtn = $('#export-fullpng-btn');
       const copyTextBtn = $('#copy-text-btn');
+      const copyPrevBtn = $('#copy-prev-btn');
       const exportJsonBtn = $('#export-json-btn');
       const importJsonBtn = $('#import-json-btn');
       const jsonFileInput = $('#json-file-input');
@@ -339,6 +358,7 @@
 
       dateSelector.addEventListener('change', e => { saveData(); currentDate = e.target.value; updateDate(currentDate); loadDataForDate(currentDate); });
 
+      // 文字複製
       copyTextBtn.addEventListener('click', async () => {
         ensureDate();
         const d = new Date(dateSelector.value + 'T00:00:00');
@@ -349,6 +369,25 @@
         try{ await navigator.clipboard.writeText(text); alert('已複製到剪貼簿'); } catch{ prompt('複製失敗，請手動複製：', text); }
       });
 
+      // 複製前日
+      const fmt = (d) => { const p=n=>String(n).padStart(2,'0'); return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`; };
+      const getPrevDate = (dateStr) => { const [y,m,dd]=dateStr.split('-').map(Number); const d=new Date(y,m-1,dd); d.setDate(d.getDate()-1); return fmt(d); };
+      const findPreviousDateWithData = (dateStr, limit=60) => { let d=dateStr; for(let i=0;i<limit;i++){ d=getPrevDate(d); const arr=allData?.[d]; if(Array.isArray(arr)&&arr.length>0) return d; } return null; };
+
+      copyPrevBtn.addEventListener('click', () => {
+        ensureDate();
+        const prev = findPreviousDateWithData(currentDate, 60);
+        if (!prev) { alert('找不到前日的聯絡事項（最近 60 天都沒有資料）。'); return; }
+        const prevItems = (allData[prev] || []).slice();
+        if (prevItems.length === 0) { alert(`${prev} 沒有項目可複製。`); return; }
+        const replace = confirm(`找到 ${prev} 的 ${prevItems.length} 項。\n\n按「確定」→ 覆蓋今天\n按「取消」→ 追加到今天後面`);
+        const result = replace ? prevItems : [...getCurrentItems(), ...prevItems];
+        renderHomeworkList(result);
+        saveData();
+        alert(replace ? '已覆蓋今日項目。' : '已把前日項目追加到今天。');
+      });
+
+      // 匯出 HTML
       if (exportHtmlBtn) {
         exportHtmlBtn.addEventListener('click', () => {
           ensureDate();
@@ -371,7 +410,7 @@
         });
       }
 
-      // 匯出卡片 PNG：開始前隱藏輸入 BAR，結束後恢復
+      // 匯出卡片 PNG：實色底、卡片實色、移除輸入列
       exportPngBtn.addEventListener('click', async () => {
         ensureDate();
         if (typeof html2canvas !== 'function') return alert('匯出模組未載入，請檢查網路');
@@ -379,7 +418,7 @@
         const ts = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
         const old = exportPngBtn.textContent; exportPngBtn.disabled = true; exportPngBtn.textContent = '匯出中…';
 
-        const bar = $('#homework-input-area'); // ← 只隱藏輸入列
+        const bar = $('#homework-input-area');
         const prevDisplay = bar?.style.display;
         if (bar) bar.style.display = 'none';
 
@@ -388,18 +427,28 @@
           const canvas = await html2canvas(node,{
             scale: Math.min(window.devicePixelRatio||1,3),
             useCORS: true,
-            backgroundColor: null,
+            backgroundColor: '#3D4A45', // 畫布實色
             logging: false,
             onclone:(doc)=>{
+              // 畫布背景也設成實色
+              doc.body.style.backgroundImage = 'none';
+              doc.body.style.background = '#3D4A45';
+
               const c=doc.querySelector('#main-card');
               if(c){
                 c.style.maxHeight='none';
+                // 卡片改實色、提高對比與陰影
+                c.style.background = '#42534e';
+                c.style.backdropFilter = 'none';
+                c.style.webkitBackdropFilter = 'none';
+                c.style.boxShadow = '0 12px 40px rgba(0,0,0,.55)';
+
                 const list=c.querySelector('#homework-list');
                 if(list) list.style.overflow='visible';
               }
-              // 加強保險：clone 裡也隱藏
+              // 直接移除輸入列，最保險
               const barClone = doc.querySelector('#homework-input-area');
-              if (barClone) barClone.style.display='none';
+              if (barClone) barClone.remove();
             }
           });
           const a=document.createElement('a'); a.download=`聯絡簿_${ts}.png`; a.href=canvas.toDataURL('image/png'); document.body.appendChild(a); a.click(); a.remove();
@@ -410,7 +459,7 @@
         }
       });
 
-      // 匯出整頁 PNG：開始前隱藏輸入 BAR，結束後恢復
+      // 匯出整頁 PNG：實色底、卡片實色、移除輸入列
       exportFullPngBtn.addEventListener('click', async () => {
         ensureDate();
         if (typeof html2canvas !== 'function') return alert('匯出模組未載入，請檢查網路');
@@ -418,7 +467,7 @@
         const ts = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
         const old = exportFullPngBtn.textContent; exportFullPngBtn.disabled = true; exportFullPngBtn.textContent = '匯出中…';
 
-        const bar = $('#homework-input-area'); // ← 只隱藏輸入列
+        const bar = $('#homework-input-area');
         const prevDisplay = bar?.style.display;
         if (bar) bar.style.display = 'none';
 
@@ -432,15 +481,20 @@
             onclone:(doc)=>{
               doc.body.style.backgroundImage='none';
               doc.body.style.background='#3D4A45';
+
               const c=doc.querySelector('#main-card');
               if(c){
                 c.style.maxHeight='none';
+                c.style.background = '#42534e';
+                c.style.backdropFilter = 'none';
+                c.style.webkitBackdropFilter = 'none';
+                c.style.boxShadow = '0 12px 40px rgba(0,0,0,.55)';
+
                 const list=c.querySelector('#homework-list');
                 if(list) list.style.overflow='visible';
               }
-              // 加強保險：clone 裡也隱藏
               const barClone = doc.querySelector('#homework-input-area');
-              if (barClone) barClone.style.display='none';
+              if (barClone) barClone.remove();
 
               const modal=doc.getElementById('template-modal');
               if(modal) modal.classList.remove('visible');
