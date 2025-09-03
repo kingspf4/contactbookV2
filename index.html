@@ -3,19 +3,25 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>智慧聯絡簿 v20.4（白字＋高對比實色匯圖）</title>
+  <title>智慧聯絡簿 v20.5（微軟正黑體＋黑卡白字＋高對比匯圖）</title>
+  <!-- 可留著 Noto 作為備援字型（若電腦沒有微軟正黑體） -->
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <style>
-    /* v20.4: 全站白字、PNG 實色底、更高對比；保留拖曳排序／JSON 匯入匯出／複製文字／複製前日等功能 */
-    @font-face { font-family: 'NumericAndLatinFont'; src: local('Inter'), local('Noto Sans TC'), local('Arial'); unicode-range: U+0020-007F; }
+    /* v20.5: 全站微軟正黑體、卡片黑底白字、PNG 實色底；保留拖曳/JSON/複製前日等功能 */
+    @font-face{
+      font-family:'NumericAndLatinFont';
+      /* 數字與英文字母優先使用微軟正黑體，沒有時退到 Inter/Arial */
+      src: local('Microsoft JhengHei'), local('Inter'), local('Arial');
+      unicode-range: U+0020-007F;
+    }
     :root{
       --primary-color:#87CEEB;
-      --card-bg:rgba(80,80,80,.65);
+      --card-bg:#000000; /* 卡片純黑 */
       --card-border:rgba(255,255,255,.2);
-      --text-color-primary:#fff;                 /* ← 改為純白 */
-      --text-color-secondary:rgba(255,255,255,.75);/* ← 次要白 */
+      --text-color-primary:#fff;                 /* 主文字白 */
+      --text-color-secondary:rgba(255,255,255,.75);
       --input-bg:rgba(0,0,0,.35);
       --shadow-color:rgba(0,0,0,.4);
       --control-border-radius:12px;
@@ -26,15 +32,26 @@
     *{box-sizing:border-box}
     html,body{height:100%;margin:0}
     body{
-      font-family:'Noto Sans TC',sans-serif;color:var(--text-color-primary);-webkit-font-smoothing:antialiased;
+      font-family:'Microsoft JhengHei','Noto Sans TC',sans-serif;
+      color:var(--text-color-primary);
+      -webkit-font-smoothing:antialiased;
       background-image:url('https://www.transparenttextures.com/patterns/green-dust-and-scratches.png');
-      background-color:#3D4A45;background-repeat:repeat;
-      padding:20px 20px 90px;display:flex;align-items:center;justify-content:center
+      background-color:#3D4A45;
+      background-repeat:repeat;
+      padding:20px 20px 90px;
+      display:flex;align-items:center;justify-content:center
     }
     .container{max-width:900px;width:100%}
     .main-header{text-align:center;margin-bottom:25px}
-    .main-title{font-family:'ZCOOL KuaiLe',sans-serif;font-size:3em;font-weight:900;color:#fff;text-shadow:0 3px 15px rgba(0,0,0,.5)}
-    .card{background:var(--card-bg);backdrop-filter:blur(25px) saturate(150%);-webkit-backdrop-filter:blur(25px) saturate(150%);border-radius:24px;border:1px solid var(--card-border);box-shadow:0 15px 50px 0 var(--shadow-color);padding:30px;animation:fadeIn .8s cubic-bezier(.2,.8,.2,1);display:flex;flex-direction:column;min-height:600px;max-height:70vh}
+    .main-title{font-family:'ZCOOL KuaiLe','Microsoft JhengHei','Noto Sans TC',sans-serif;font-size:3em;font-weight:900;color:#fff;text-shadow:0 3px 15px rgba(0,0,0,.5)}
+    .card{
+      background:var(--card-bg);                /* 黑底 */
+      backdrop-filter:none; -webkit-backdrop-filter:none; /* 移除玻璃霧化 */
+      border-radius:24px;border:1px solid var(--card-border);
+      box-shadow:0 15px 50px 0 var(--shadow-color);
+      padding:30px;animation:fadeIn .8s cubic-bezier(.2,.8,.2,1);
+      display:flex;flex-direction:column;min-height:600px;max-height:70vh
+    }
     @keyframes fadeIn{from{opacity:0;transform:translateY(20px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
     @keyframes itemFadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
     .card-header{text-align:center;margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--card-border);flex-shrink:0}
@@ -43,17 +60,28 @@
     #week-display{font-size:1.2em;font-weight:500;color:var(--text-color-secondary);margin-top:8px}
 
     .homework-list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:12px;flex-grow:1;overflow:auto;padding:5px;margin:0 -5px}
-    .homework-item{font-family:'NumericAndLatinFont','ZCOOL KuaiLe','Noto Sans TC',sans-serif;font-size:var(--item-font-size);display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--control-border-radius);transition:background-color .2s ease, box-shadow .2s ease;animation:itemFadeIn .25s ease forwards;position:relative;border:1px dashed transparent}
+    .homework-item{
+      font-family:'NumericAndLatinFont','Microsoft JhengHei','ZCOOL KuaiLe','Noto Sans TC',sans-serif;
+      font-size:var(--item-font-size);
+      display:flex;align-items:center;gap:10px;
+      padding:10px 12px;border-radius:var(--control-border-radius);
+      transition:background-color .2s ease, box-shadow .2s ease;
+      animation:itemFadeIn .25s ease forwards;position:relative;border:1px dashed transparent
+    }
     .homework-item .grab{cursor:grab;user-select:none;opacity:.7}
     .homework-item.dragging{opacity:.6}
     .homework-item.drag-over{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.25)}
     .homework-item .item-content{flex-grow:1;outline:none}
-    .homework-item:hover,.homework-item:focus-within{background-color:rgba(0,0,0,.2)}
-    .item-index{font-family:'NumericAndLatinFont','Inter',sans-serif;font-weight:600;color:var(--text-color-secondary)}
+    .homework-item:hover,.homework-item:focus-within{background-color:rgba(255,255,255,.06)}
+    .item-index{font-family:'NumericAndLatinFont','Microsoft JhengHei','Inter',sans-serif;font-weight:600;color:var(--text-color-secondary)}
 
     #homework-input-area{display:flex;gap:0;background-color:var(--input-bg);border-radius:var(--control-border-radius);border:1px solid rgba(255,255,255,.1);transition:box-shadow .3s ease;flex-shrink:0;margin-top:20px}
     #homework-input-area:focus-within{box-shadow:0 0 0 4px var(--primary-color)}
-    #new-homework-input{flex-grow:1;background:none;border:none;padding:14px 18px;font-size:1.2em;color:var(--text-color-primary);font-family:'NumericAndLatinFont','ZCOOL KuaiLe',sans-serif}
+    #new-homework-input{
+      flex-grow:1;background:none;border:none;padding:14px 18px;font-size:1.2em;
+      color:var(--text-color-primary);
+      font-family:'NumericAndLatinFont','Microsoft JhengHei','ZCOOL KuaiLe','Noto Sans TC',sans-serif
+    }
     #new-homework-input:focus{outline:none}
     .add-btn{background:var(--primary-color);color:#1c1c1e}
 
@@ -71,7 +99,7 @@
     .footer-buttons button{font-size:.95em;padding:10px 14px;flex-grow:1;flex-basis:150px;text-align:center}
 
     .font-slider-container{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.15);padding:8px 12px;border-radius:var(--control-border-radius);flex-grow:1;flex-basis:150px}
-    .font-slider-container label{font-family:'ZCOOL KuaiLe',sans-serif;font-size:1.1em;font-weight:600}
+    .font-slider-container label{font-family:'ZCOOL KuaiLe','Microsoft JhengHei','Noto Sans TC',sans-serif;font-size:1.1em;font-weight:600}
     #font-size-slider{width:100%;-webkit-appearance:none;background:transparent}
     #font-size-slider:focus{outline:none}
     #font-size-slider::-webkit-slider-runnable-track{height:4px;background:rgba(0,0,0,.5);border-radius:5px}
@@ -95,7 +123,7 @@
     .category-tabs{display:flex;flex-wrap:wrap;gap:10px;border-bottom:1px solid var(--card-border);padding-bottom:15px;margin-bottom:20px}
     .tab-btn{background:rgba(0,0,0,.2);color:var(--text-color-secondary);padding:10px 15px;border-radius:10px;font-weight:600}
     .tab-btn.active{background:var(--primary-color);color:#1c1c1e}
-    .templates-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;max-height:45vh;overflow-y:auto;padding-right:10px;font-family:'NumericAndLatinFont','ZCOOL KuaiLe',sans-serif}
+    .templates-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;max-height:45vh;overflow-y:auto;padding-right:10px;font-family:'NumericAndLatinFont','Microsoft JhengHei','ZCOOL KuaiLe','Noto Sans TC',sans-serif}
     .template-item{background:var(--input-bg);color:var(--text-color-primary);text-align:left;padding:15px;border-radius:10px;font-size:1.2em}
     .template-item:hover{background:var(--primary-color);color:#1c1c1e}
 
@@ -207,7 +235,7 @@
       const renderHomeworkList = (items) => {
         homeworkList.innerHTML = '';
         if (!items || items.length === 0) {
-          homeworkList.innerHTML = `<p style="font-family:'Noto Sans TC',sans-serif;font-size:1rem;text-align:center;margin:auto;">點擊下方輸入框新增今日聯絡事項</p>`;
+          homeworkList.innerHTML = `<p style="font-family:'Microsoft JhengHei','Noto Sans TC',sans-serif;font-size:1rem;text-align:center;margin:auto;">點擊下方輸入框新增今日聯絡事項</p>`;
           return;
         }
         items.forEach((text, idx) => {
@@ -410,7 +438,7 @@
         });
       }
 
-      // 匯出卡片 PNG：實色底、卡片實色、移除輸入列
+      // 匯出卡片 PNG：實色底、卡片黑底、移除輸入列
       exportPngBtn.addEventListener('click', async () => {
         ensureDate();
         if (typeof html2canvas !== 'function') return alert('匯出模組未載入，請檢查網路');
@@ -427,26 +455,22 @@
           const canvas = await html2canvas(node,{
             scale: Math.min(window.devicePixelRatio||1,3),
             useCORS: true,
-            backgroundColor: '#3D4A45', // 畫布實色
+            backgroundColor: '#3D4A45', // 畫布實色（不透明）
             logging: false,
             onclone:(doc)=>{
-              // 畫布背景也設成實色
               doc.body.style.backgroundImage = 'none';
               doc.body.style.background = '#3D4A45';
 
               const c=doc.querySelector('#main-card');
               if(c){
                 c.style.maxHeight='none';
-                // 卡片改實色、提高對比與陰影
-                c.style.background = '#42534e';
+                c.style.background = '#000000';        // 卡片純黑
                 c.style.backdropFilter = 'none';
                 c.style.webkitBackdropFilter = 'none';
                 c.style.boxShadow = '0 12px 40px rgba(0,0,0,.55)';
-
                 const list=c.querySelector('#homework-list');
                 if(list) list.style.overflow='visible';
               }
-              // 直接移除輸入列，最保險
               const barClone = doc.querySelector('#homework-input-area');
               if (barClone) barClone.remove();
             }
@@ -459,7 +483,7 @@
         }
       });
 
-      // 匯出整頁 PNG：實色底、卡片實色、移除輸入列
+      // 匯出整頁 PNG：實色底、卡片黑底、移除輸入列
       exportFullPngBtn.addEventListener('click', async () => {
         ensureDate();
         if (typeof html2canvas !== 'function') return alert('匯出模組未載入，請檢查網路');
@@ -485,11 +509,10 @@
               const c=doc.querySelector('#main-card');
               if(c){
                 c.style.maxHeight='none';
-                c.style.background = '#42534e';
+                c.style.background = '#000000';        // 卡片純黑
                 c.style.backdropFilter = 'none';
                 c.style.webkitBackdropFilter = 'none';
                 c.style.boxShadow = '0 12px 40px rgba(0,0,0,.55)';
-
                 const list=c.querySelector('#homework-list');
                 if(list) list.style.overflow='visible';
               }
@@ -552,3 +575,4 @@
   </script>
 </body>
 </html>
+
