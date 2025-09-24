@@ -2,113 +2,553 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>智慧聯絡簿 v20.6（日期切換＋精簡功能＋大版面）</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>智慧聯絡簿 v20.7（恢復完整功能＋日期左右鍵＋黑卡白字）</title>
+  <!-- 仍保留 Noto 作備援 -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <style>
+    /* v20.7: 回復拖曳/直書/範本/複製；新增日期左右鍵；移除 JSON/HTML 匯出；加大版面；黑卡白字；微軟正黑體；匯圖不透明＋隱藏輸入列 */
+    @font-face{
+      font-family:'NumericAndLatinFont';
+      src: local('Microsoft JhengHei'), local('Inter'), local('Arial');
+      unicode-range: U+0020-007F;
+    }
     :root{
       --primary-color:#87CEEB;
-      --card-bg:#000;
+      --card-bg:#000000;
       --card-border:rgba(255,255,255,.2);
-      --text-color-primary:#fff;
+      --text-color-primary:#ffffff;
       --text-color-secondary:rgba(255,255,255,.75);
-      --input-bg:rgba(0,0,0,.35);
-      --shadow-color:rgba(0,0,0,.4);
-      --control-border-radius:12px;
-      --item-font-size:1.65em;
+      --input-bg:rgba(255,255,255,.08);
+      --shadow-color:rgba(0,0,0,.5);
+      --control-border-radius:14px;
+      --delete-color:#ff5c5c;
+      --item-font-size:1.75em; /* 放大預設字級 */
+      --danger:#ff5c5c;
+      --page-bg:#3D4A45;       /* 匯圖用的實色背景 */
     }
-    body{margin:0;height:100%;display:flex;align-items:center;justify-content:center;
-      background:#3D4A45;font-family:'Microsoft JhengHei','Noto Sans TC',sans-serif;color:var(--text-color-primary);}
-    .container{max-width:1100px;width:100%}
-    .card{background:var(--card-bg);border:1px solid var(--card-border);
-      border-radius:24px;padding:40px;min-height:700px;box-shadow:0 15px 50px rgba(0,0,0,.5)}
-    .card-header{text-align:center;margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--card-border);}
-    #date-nav{display:flex;justify-content:center;align-items:center;gap:15px;margin-bottom:10px}
-    #date-selector{background:none;border:none;color:var(--text-color-primary);font-size:2em;font-weight:700;text-align:center;cursor:pointer}
-    #week-display{font-size:1.2em;color:var(--text-color-secondary)}
-    .homework-list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:14px;flex-grow:1}
-    .homework-item{font-size:var(--item-font-size);display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--control-border-radius);}
-    .item-index{color:var(--text-color-secondary)}
-    #homework-input-area{display:flex;margin-top:20px;background:var(--input-bg);border-radius:var(--control-border-radius);}
-    #new-homework-input{flex-grow:1;background:none;border:none;padding:14px 18px;font-size:1.2em;color:var(--text-color-primary);}
-    .add-btn{background:var(--primary-color);border:none;padding:12px 16px;border-radius:var(--control-border-radius);}
-    .footer-buttons{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin-top:20px}
-    button{cursor:pointer;border:none;border-radius:var(--control-border-radius);padding:10px 14px;font-weight:600}
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0}
+    body{
+      font-family:'Microsoft JhengHei','Noto Sans TC',sans-serif;
+      color:var(--text-color-primary);
+      background:var(--page-bg) url('https://www.transparenttextures.com/patterns/green-dust-and-scratches.png') repeat;
+      -webkit-font-smoothing:antialiased;
+      padding:28px 24px 110px;
+      display:flex;align-items:center;justify-content:center
+    }
+    .container{max-width:1200px;width:100%}
+    .main-header{text-align:center;margin-bottom:22px}
+    .main-title{
+      font-family:'ZCOOL KuaiLe','Microsoft JhengHei','Noto Sans TC',sans-serif;
+      font-size:3.1em;font-weight:900;color:#fff;text-shadow:0 3px 15px rgba(0,0,0,.6)
+    }
+    .card{
+      background:var(--card-bg);border:1px solid var(--card-border);
+      border-radius:26px;box-shadow:0 18px 60px var(--shadow-color);
+      padding:44px;display:flex;flex-direction:column;
+      min-height:760px;max-height:76vh;animation:fadeIn .6s ease
+    }
+    @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+    .card-header{text-align:center;margin-bottom:22px;padding-bottom:20px;border-bottom:1px solid var(--card-border);flex-shrink:0}
+    #date-nav{display:flex;justify-content:center;align-items:center;gap:14px;margin-bottom:10px}
+    .date-btn{background:rgba(255,255,255,.15);color:#fff;border:none;border-radius:var(--control-border-radius);padding:10px 14px;cursor:pointer;font-weight:700}
+    .date-btn:hover{background:rgba(255,255,255,.25)}
+    #date-selector{
+      background:none;border:none;color:var(--text-color-primary);font-size:2.2em;font-weight:800;cursor:pointer;text-align:center
+    }
+    #date-selector::-webkit-calendar-picker-indicator{filter:invert(1);transform:scale(1.2);cursor:pointer}
+    #week-display{font-size:1.25em;color:var(--text-color-secondary)}
+
+    .homework-list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:14px;flex-grow:1;overflow:auto;padding:6px;margin:0 -6px}
+    .homework-item{
+      font-family:'NumericAndLatinFont','Microsoft JhengHei','ZCOOL KuaiLe','Noto Sans TC',sans-serif;
+      font-size:var(--item-font-size);
+      display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:var(--control-border-radius);
+      transition:background-color .15s ease,border-color .15s ease; border:1px dashed transparent
+    }
+    .homework-item:hover,.homework-item:focus-within{background:rgba(255,255,255,.06)}
+    .homework-item .grab{cursor:grab;user-select:none;opacity:.75}
+    .homework-item.dragging{opacity:.65}
+    .homework-item.drag-over{background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.3)}
+    .item-index{color:var(--text-color-secondary);font-weight:700}
+    .item-content{flex-grow:1;outline:none}
+
+    #homework-input-area{
+      display:flex;gap:0;background:var(--input-bg);
+      border-radius:var(--control-border-radius);border:1px solid rgba(255,255,255,.15);
+      transition:box-shadow .25s ease;flex-shrink:0;margin-top:18px
+    }
+    #homework-input-area:focus-within{box-shadow:0 0 0 4px var(--primary-color)}
+    #new-homework-input{
+      flex-grow:1;background:none;border:none;padding:16px 18px;font-size:1.25em;color:var(--text-color-primary);
+      font-family:'NumericAndLatinFont','Microsoft JhengHei','ZCOOL KuaiLe','Noto Sans TC',sans-serif
+    }
+    #new-homework-input:focus{outline:none}
+    .add-btn{background:var(--primary-color);color:#111;padding:12px 16px;border:none;border-radius:var(--control-border-radius);cursor:pointer}
+
+    button{border:none;font-weight:700;cursor:pointer;border-radius:var(--control-border-radius);padding:11px 16px}
     .btn-primary{background:var(--primary-color);color:#111}
     .btn-secondary{background:rgba(255,255,255,.15);color:#fff}
+    .btn-secondary:hover{background:rgba(255,255,255,.25)}
     .btn-danger{background:rgba(255,86,86,.18);color:#ffd3d3;border:1px solid rgba(255,86,86,.35)}
+    .delete-item-btn{opacity:0;background:none;color:rgba(255,255,255,.6);font-size:1.15em;padding:4px 10px}
+    .homework-item:hover .delete-item-btn{opacity:1}
+    .delete-item-btn:hover{color:var(--delete-color);transform:scale(1.05)}
+
+    .footer-buttons{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin-top:18px;align-items:center}
+    .footer-buttons button{flex-grow:1;flex-basis:170px}
+
+    .font-slider-container{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.15);padding:8px 12px;border-radius:var(--control-border-radius);flex-grow:1;flex-basis:200px}
+    .font-slider-container label{font-family:'ZCOOL KuaiLe','Microsoft JhengHei','Noto Sans TC',sans-serif;font-size:1.1em}
+    #font-size-slider{width:100%;-webkit-appearance:none;background:transparent}
+    #font-size-slider::-webkit-slider-runnable-track{height:4px;background:rgba(0,0,0,.5);border-radius:6px}
+    #font-size-slider::-webkit-slider-thumb{-webkit-appearance:none;height:20px;width:20px;background:var(--primary-color);border-radius:50%;margin-top:-8px;cursor:pointer}
+
+    .creator-credit{display:none!important}
+
+    /* 直書模式 */
+    .vertical-mode{flex-direction:row-reverse;align-items:flex-start;overflow-x:auto;overflow-y:hidden;gap:20px}
+    .vertical-mode .homework-item{display:flex;flex-direction:column;justify-content:space-between;align-items:stretch;width:auto;min-width:120px;min-height:420px;flex-shrink:0;padding:20px 16px}
+    .vertical-mode .item-index{border-bottom:1px solid var(--text-color-secondary);padding-bottom:10px;margin-bottom:14px}
+    .vertical-mode .item-content{writing-mode:vertical-rl;overflow-y:auto;text-align:right;max-height:260px}
+    .vertical-mode .horizontal-in-vertical{writing-mode:horizontal-tb;display:inline-block;text-orientation:mixed}
+    .vertical-mode .delete-item-btn{opacity:1;align-self:center}
+
+    #template-modal{display:none;position:fixed;inset:0;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);background:rgba(0,0,0,.55);align-items:center;justify-content:center;z-index:10;opacity:0;transition:opacity .25s ease}
+    #template-modal.visible{display:flex;opacity:1}
+    .template-card{padding:28px;max-width:900px;width:92%;background:#111;border:1px solid rgba(255,255,255,.2);border-radius:20px}
+    .category-tabs{display:flex;flex-wrap:wrap;gap:10px;border-bottom:1px solid var(--card-border);padding-bottom:14px;margin-bottom:18px}
+    .tab-btn{background:rgba(255,255,255,.08);color:#fff;padding:10px 14px;border-radius:10px;font-weight:700}
+    .tab-btn.active{background:var(--primary-color);color:#111}
+    .templates-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;max-height:50vh;overflow:auto}
+    .template-item{background:var(--input-bg);color:#fff;text-align:left;padding:14px;border-radius:10px;font-size:1.2em}
+    .template-item:hover{background:var(--primary-color);color:#111}
   </style>
 </head>
 <body>
   <div class="container">
+    <div class="main-header"><h1 class="main-title">智慧聯絡簿</h1></div>
+
     <div class="card" id="main-card">
       <div class="card-header">
         <div id="date-nav">
-          <button id="prev-day-btn" class="btn-secondary">◀ 前一天</button>
-          <input type="date" id="date-selector">
-          <button id="next-day-btn" class="btn-secondary">後一天 ▶</button>
+          <button id="prev-day-btn" class="date-btn">◀ 前一天</button>
+          <input type="date" id="date-selector" aria-label="選擇日期">
+          <button id="next-day-btn" class="date-btn">後一天 ▶</button>
         </div>
-        <div id="week-display"></div>
+        <div id="week-display" aria-live="polite"></div>
       </div>
-      <ul class="homework-list" id="homework-list"></ul>
+
+      <ul class="homework-list" id="homework-list" aria-label="聯絡事項清單"></ul>
+
       <div id="homework-input-area">
-        <input type="text" id="new-homework-input" placeholder="新增事項...">
-        <button id="add-item-btn" class="add-btn">➕</button>
+        <input type="text" id="new-homework-input" placeholder="新增事項..." aria-label="新增事項">
+        <button id="add-item-btn" class="add-btn" aria-label="加入事項">➕</button>
+        <button id="show-template-btn" class="btn-secondary" title="從範本加入" aria-label="從範本加入">🪄</button>
       </div>
     </div>
 
     <div class="footer-buttons">
-      <button id="toggle-vertical-btn" class="btn-secondary">切換直書</button>
+      <button id="toggle-vertical-btn" class="btn-secondary" aria-pressed="false">切換直書</button>
+      <div class="font-slider-container">
+        <label for="font-size-slider">字級</label>
+        <input type="range" id="font-size-slider" min="1.2" max="3" step="0.05" value="1.75" aria-label="字級大小">
+      </div>
       <button id="toggle-presentation-btn" class="btn-secondary">全螢幕展示</button>
+
       <button id="export-png-btn" class="btn-primary">匯出圖片（PNG）</button>
       <button id="export-fullpng-btn" class="btn-secondary">匯出整頁（PNG）</button>
+
       <button id="copy-text-btn" class="btn-secondary">複製文字</button>
       <button id="copy-prev-btn" class="btn-secondary">複製前日</button>
       <button id="clear-today-btn" class="btn-danger">清空今日</button>
     </div>
   </div>
 
+  <div id="template-modal" role="dialog" aria-modal="true" aria-label="選擇作業範本">
+    <div class="template-card">
+      <h2 style="margin-top:0">選擇作業範本</h2>
+      <div id="category-tabs" class="category-tabs"></div>
+      <div id="templates-grid" class="templates-grid"></div>
+    </div>
+  </div>
+
+  <a href="https://www.facebook.com/FunFun.AI.Teacher/" target="_blank" rel="noopener noreferrer" class="creator-credit">Created by 方方老師</a>
+
   <script>
-    document.addEventListener('DOMContentLoaded',()=>{
-      const $=s=>document.querySelector(s);
-      const $$=s=>Array.from(document.querySelectorAll(s));
-      const dateSelector=$('#date-selector');
-      const weekDisplay=$('#week-display');
-      const homeworkList=$('#homework-list');
-      const addItemBtn=$('#add-item-btn');
-      const newHomeworkInput=$('#new-homework-input');
-      const prevDayBtn=$('#prev-day-btn');
-      const nextDayBtn=$('#next-day-btn');
-      const exportPngBtn=$('#export-png-btn');
-      const exportFullPngBtn=$('#export-fullpng-btn');
-      const copyTextBtn=$('#copy-text-btn');
-      const copyPrevBtn=$('#copy-prev-btn');
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelector('.creator-credit')?.remove();
 
-      let allData={},today=new Date();
-      const pad=n=>String(n).padStart(2,'0');
-      let currentDate=`${today.getFullYear()}-${pad(today.getMonth()+1)}-${pad(today.getDate())}`;
+      // 快速選擇器
+      const $ = s => document.querySelector(s);
+      const $$ = s => Array.from(document.querySelectorAll(s));
 
-      const saveData=()=>{allData[currentDate]=getItems();localStorage.setItem('contactbook',JSON.stringify(allData));};
-      const loadData=()=>{try{allData=JSON.parse(localStorage.getItem('contactbook'))||{}}catch{};render(allData[currentDate]||[]);}
-      const getItems=()=>$$( '.item-content').map(el=>el.textContent.trim()).filter(Boolean);
-      const updateDate=(ds)=>{const d=new Date(ds+'T00:00:00');weekDisplay.textContent=['日','一','二','三','四','五','六'][d.getDay()];dateSelector.value=ds;};
-      const render=(arr)=>{homeworkList.innerHTML=arr.length?arr.map((t,i)=>`<li class="homework-item"><span class="item-index">${i+1}.</span><span class="item-content" contenteditable>${t}</span></li>`).join(''):`<p>點擊下方輸入框新增今日聯絡事項</p>`;};
+      // DOM
+      const dateSelector = $('#date-selector');
+      const weekDisplay = $('#week-display');
+      const homeworkList = $('#homework-list');
+      const newHomeworkInput = $('#new-homework-input');
+      const addItemBtn = $('#add-item-btn');
+      const exportPngBtn = $('#export-png-btn');
+      const exportFullPngBtn = $('#export-fullpng-btn');
+      const copyTextBtn = $('#copy-text-btn');
+      const copyPrevBtn = $('#copy-prev-btn');
+      const togglePresentationBtn = $('#toggle-presentation-btn');
+      const toggleVerticalBtn = $('#toggle-vertical-btn');
+      const fontSizeSlider = $('#font-size-slider');
+      const prevDayBtn = $('#prev-day-btn');
+      const nextDayBtn = $('#next-day-btn');
 
-      function changeDay(offset){const d=new Date(currentDate+'T00:00:00');d.setDate(d.getDate()+offset);currentDate=`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;updateDate(currentDate);render(allData[currentDate]||[]);}
-      prevDayBtn.onclick=()=>{saveData();changeDay(-1);};
-      nextDayBtn.onclick=()=>{saveData();changeDay(+1);};
+      // 狀態
+      const today = new Date();
+      const pad = n => String(n).padStart(2,'0');
+      let currentDate = `${today.getFullYear()}-${pad(today.getMonth()+1)}-${pad(today.getDate())}`;
+      let isPresentationMode = false;
+      let isVerticalMode = false;
+      let allData = {};
 
-      addItemBtn.onclick=()=>{if(!newHomeworkInput.value.trim())return;const arr=getItems();arr.push(newHomeworkInput.value.trim());render(arr);saveData();newHomeworkInput.value='';};
+      // 範本
+      const templates = {
+        "國語文":["國習 L__","國語習作 p.__-`__`","甲本 p.__-`__`","生字本 L__","語詞本 L__","國練 第__回","圈詞 L__ 寫__遍","背書 L__","默書 L__","日記","閱讀心得"],
+        "數學":["數習 p.__-`__`","數練 第__回","數作 p.__-`__`","計算練習本 p.__","數卷訂簽","應用題 x__"],
+        "英語":["英習 U__","英聽","單字 U__ 寫__遍","背單字 U__","句型練習 x__","課文朗讀 U__"],
+        "社會自然":["社習 p.__-`__`","自習 p.__-`__`","社卷訂簽","自卷訂簽","學習單","報告：__","觀察紀錄：__"],
+        "通用":["考卷訂簽","複習 L__-`__`","預習 L__","發回條","帶__","做家事","運動30分鐘","親子共讀"]
+      };
 
-      copyTextBtn.onclick=async()=>{const items=getItems().map((t,i)=>`${i+1}. ${t}`).join('\n');await navigator.clipboard.writeText(items||'');alert('已複製');};
-      copyPrevBtn.onclick=()=>{const d=new Date(currentDate+'T00:00:00');d.setDate(d.getDate()-1);const prev=`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;if(!allData[prev]||!allData[prev].length)return alert('前一天沒有資料');render(allData[prev]);saveData();};
+      // 儲存／載入
+      const getCurrentItems = () => $$('.item-content').map(el => el.textContent.trim()).filter(Boolean);
+      const saveData = () => { allData[currentDate] = getCurrentItems(); localStorage.setItem('ultraContactBook_v20_final', JSON.stringify(allData)); };
+      const loadData = () => { try { const data = JSON.parse(localStorage.getItem('ultraContactBook_v20_final')); if (data && typeof data === 'object') allData = data; } catch(e) {} loadDataForDate(currentDate); };
+      const loadDataForDate = (date) => { renderHomeworkList(allData[date] || []); };
 
-      // 匯出圖片
-      async function exportImg(node,filename,bg){const canvas=await html2canvas(node,{backgroundColor:bg,scale:2});const a=document.createElement('a');a.download=filename;a.href=canvas.toDataURL();a.click();}
-      exportPngBtn.onclick=()=>exportImg($('#main-card'),`聯絡簿_${currentDate}.png`,'#3D4A45');
-      exportFullPngBtn.onclick=()=>exportImg($('.container'),`聯絡簿整頁_${currentDate}.png`,'#3D4A45');
+      // UI：日期與星期
+      const updateDate = (dateString) => {
+        const d = new Date(dateString + 'T00:00:00');
+        const week = ['星期日','星期一','星期二','星期三','星期四','星期五','星期六'][d.getDay()];
+        weekDisplay.textContent = week;
+        dateSelector.value = dateString;
+      };
+      const ensureDate = () => { if (!dateSelector.value) { dateSelector.value = currentDate; } };
 
-      updateDate(currentDate);loadData();
+      // 直書模式保留英文/數字橫排
+      const processTextForVertical = (text) => {
+        const regex = /([a-zA-Z0-9\s._'`-]+)/g;
+        return text.split(regex).map(seg => seg.match(regex) && seg.trim()!=='' ? `<span class="horizontal-in-vertical">${seg}</span>` : `<span>${seg}</span>`).join('');
+      };
+
+      // 渲染清單
+      const renderHomeworkList = (items) => {
+        homeworkList.innerHTML = '';
+        if (!items || items.length === 0) {
+          homeworkList.innerHTML = `<p style="font-size:1.05rem;text-align:center;margin:auto;">點擊下方輸入框新增今日聯絡事項</p>`;
+          return;
+        }
+        items.forEach((text, idx) => {
+          const li = document.createElement('li');
+          li.className = 'homework-item';
+          li.setAttribute('draggable','true');
+          const contentHTML = isVerticalMode ? processTextForVertical(text) : text;
+          li.innerHTML = `
+            <span class="grab" title="拖曳排序">☰</span>
+            <span class="item-index">${idx+1}.</span>
+            <span class="item-content" contenteditable="true">${contentHTML}</span>
+            <button class="delete-item-btn" title="刪除">&times;</button>
+          `;
+          homeworkList.appendChild(li);
+        });
+      };
+
+      // 新增事項
+      const addHomework = (text) => {
+        const t = (text||'').trim();
+        if (!t) return;
+        const arr = getCurrentItems();
+        arr.push(t);
+        renderHomeworkList(arr);
+        saveData();
+        newHomeworkInput.value = '';
+        newHomeworkInput.focus();
+      };
+
+      // 模式切換
+      const togglePresentation = () => {
+        isPresentationMode = !isPresentationMode;
+        togglePresentationBtn.textContent = isPresentationMode ? '返回編輯' : '全螢幕展示';
+        if (isPresentationMode) document.documentElement.requestFullscreen?.();
+        else if (document.fullscreenElement) document.exitFullscreen?.();
+      };
+      const toggleVertical = () => {
+        isVerticalMode = !isVerticalMode;
+        homeworkList.classList.toggle('vertical-mode', isVerticalMode);
+        toggleVerticalBtn.setAttribute('aria-pressed', String(isVerticalMode));
+        toggleVerticalBtn.textContent = isVerticalMode ? '切換橫書' : '切換直書';
+        renderHomeworkList(getCurrentItems());
+      };
+      const applyAndSaveFontSize = (size) => {
+        document.documentElement.style.setProperty('--item-font-size', `${size}em`);
+        localStorage.setItem('fontSizePreference_v20', size);
+      };
+      const loadPreferences = () => {
+        const s = localStorage.getItem('fontSizePreference_v20');
+        if (s) { fontSizeSlider.value = s; applyAndSaveFontSize(s); }
+      };
+
+      // 範本 Modal
+      const initTemplateModal = () => {
+        const modal = $('#template-modal');
+        const showTemplateBtn = $('#show-template-btn');
+        const categoryTabs = $('#category-tabs');
+        const templatesGrid = $('#templates-grid');
+        let isInitialized = false;
+        const show = () => modal.classList.add('visible');
+        const hide = () => modal.classList.remove('visible');
+        const renderCategory = (cat) => {
+          categoryTabs.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+          categoryTabs.querySelector(`.tab-btn[data-category="${cat}"]`)?.classList.add('active');
+          templatesGrid.innerHTML='';
+          (templates[cat]||[]).forEach(t => {
+            const btn = document.createElement('button');
+            btn.className = 'template-item';
+            btn.textContent = t;
+            btn.onclick = () => { addHomework(t); hide(); };
+            templatesGrid.appendChild(btn);
+          });
+        };
+        showTemplateBtn.addEventListener('click', () => {
+          if (!isInitialized) {
+            Object.keys(templates).forEach(cat => {
+              const tab = document.createElement('button');
+              tab.className='tab-btn'; tab.textContent = cat; tab.dataset.category = cat;
+              tab.onclick = () => renderCategory(cat);
+              categoryTabs.appendChild(tab);
+            });
+            renderCategory(Object.keys(templates)[0]);
+            isInitialized = true;
+          }
+          show();
+        });
+        modal.addEventListener('click', e => { if (e.target === modal) hide(); });
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') hide(); });
+      };
+
+      // 事件：刪除/儲存/Enter/安全貼上
+      homeworkList.addEventListener('click', e => {
+        if (e.target.classList.contains('delete-item-btn')) {
+          const item = e.target.closest('.homework-item');
+          const idx = $$('.homework-item').indexOf(item);
+          const arr = getCurrentItems();
+          arr.splice(idx,1);
+          renderHomeworkList(arr);
+          saveData();
+        }
+      });
+      homeworkList.addEventListener('focusout', e => { if (e.target.classList.contains('item-content')) saveData(); });
+      homeworkList.addEventListener('keydown', e => {
+        if (e.target.classList.contains('item-content') && e.key === 'Enter' && !e.isComposing) { e.preventDefault(); e.target.blur(); }
+      });
+      homeworkList.addEventListener('paste', e => {
+        if (e.target.classList.contains('item-content')) {
+          e.preventDefault();
+          const text = (e.clipboardData || window.clipboardData).getData('text');
+          document.execCommand('insertText', false, text);
+        }
+      });
+
+      // 拖曳排序
+      let dragIndex = null;
+      homeworkList.addEventListener('dragstart', e => {
+        const li = e.target.closest('.homework-item');
+        if (!li) return;
+        li.classList.add('dragging');
+        dragIndex = $$('.homework-item').indexOf(li);
+        e.dataTransfer.effectAllowed = 'move';
+      });
+      homeworkList.addEventListener('dragend', e => {
+        e.target.closest('.homework-item')?.classList.remove('dragging');
+        $$('.homework-item').forEach(li=>li.classList.remove('drag-over'));
+        dragIndex = null;
+      });
+      homeworkList.addEventListener('dragover', e => {
+        e.preventDefault();
+        const li = e.target.closest('.homework-item');
+        if (!li) return;
+        $$('.homework-item').forEach(x=>x.classList.remove('drag-over'));
+        li.classList.add('drag-over');
+        e.dataTransfer.dropEffect = 'move';
+      });
+      homeworkList.addEventListener('drop', e => {
+        e.preventDefault();
+        const li = e.target.closest('.homework-item');
+        $$('.homework-item').forEach(x=>x.classList.remove('drag-over'));
+        if (li == null || dragIndex == null) return;
+        const dropIndex = $$('.homework-item').indexOf(li);
+        if (dropIndex === -1 || dragIndex === dropIndex) return;
+        const arr = getCurrentItems();
+        const [moved] = arr.splice(dragIndex,1);
+        arr.splice(dropIndex,0,moved);
+        renderHomeworkList(arr);
+        saveData();
+      });
+
+      // 日期切換（按鈕＋原生 date）
+      const fmt = (d) => { const p=n=>String(n).padStart(2,'0'); return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`; };
+      const addDays = (dateStr, offset) => { const [y,m,dd]=dateStr.split('-').map(Number); const d=new Date(y,m-1,dd); d.setDate(d.getDate()+offset); return fmt(d); };
+      const goToDay = (ds) => { saveData(); currentDate = ds; updateDate(currentDate); loadDataForDate(currentDate); };
+      prevDayBtn.addEventListener('click', () => goToDay(addDays(currentDate, -1)));
+      nextDayBtn.addEventListener('click', () => goToDay(addDays(currentDate, +1)));
+      dateSelector.addEventListener('change', e => goToDay(e.target.value));
+      // （依需求：不支援鍵盤左右方向鍵快切，故不加任何 keydown 監聽）
+
+      // 文字複製
+      copyTextBtn.addEventListener('click', async () => {
+        const d = new Date((dateSelector.value||currentDate) + 'T00:00:00');
+        const week = ['日','一','二','三','四','五','六'][d.getDay()];
+        const header = `${(dateSelector.value||currentDate).replace(/-/g,'/')}（星期${week}）`;
+        const items = getCurrentItems().map((t,i)=>`${i+1}. ${t}`).join('\n');
+        const text = `${header}\n${items}`;
+        try{ await navigator.clipboard.writeText(text); alert('已複製到剪貼簿'); } catch{ prompt('複製失敗，請手動複製：', text); }
+      });
+
+      // 複製前日（尋找最近有資料的前一日，最多往前 60 天）
+      const getPrevDate = (dateStr) => addDays(dateStr, -1);
+      const findPreviousDateWithData = (dateStr, limit=60) => { let d=dateStr; for(let i=0;i<limit;i++){ d=getPrevDate(d); const arr=allData?.[d]; if(Array.isArray(arr)&&arr.length>0) return d; } return null; };
+      copyPrevBtn.addEventListener('click', () => {
+        const prev = findPreviousDateWithData(currentDate, 60);
+        if (!prev) { alert('找不到前日的聯絡事項（最近 60 天都沒有資料）。'); return; }
+        const prevItems = (allData[prev] || []).slice();
+        const replace = confirm(`找到 ${prev} 的 ${prevItems.length} 項。\n\n按「確定」→ 覆蓋今天\n按「取消」→ 追加到今天後面`);
+        const result = replace ? prevItems : [...getCurrentItems(), ...prevItems];
+        renderHomeworkList(result);
+        saveData();
+        alert(replace ? '已覆蓋今日項目。' : '已把前日項目追加到今天。');
+      });
+
+      // 匯出圖片（卡片）：實色底、不透明；並在截圖前隱藏輸入列
+      exportPngBtn.addEventListener('click', async () => {
+        ensureDate();
+        if (typeof html2canvas !== 'function') return alert('匯出模組未載入，請檢查網路');
+        const d = new Date(dateSelector.value + 'T00:00:00');
+        const ts = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+        const old = exportPngBtn.textContent; exportPngBtn.disabled = true; exportPngBtn.textContent = '匯出中…';
+
+        const bar = $('#homework-input-area');
+        const prevDisplay = bar?.style.display;
+        if (bar) bar.style.display = 'none';
+
+        try{
+          const node = $('#main-card');
+          const canvas = await html2canvas(node,{
+            scale: Math.min(window.devicePixelRatio||1,3),
+            useCORS: true,
+            backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--page-bg').trim() || '#3D4A45',
+            logging: false,
+            onclone:(doc)=>{
+              // 背景與卡片穩定化
+              doc.body.style.backgroundImage='none';
+              doc.body.style.background=getComputedStyle(document.documentElement).getPropertyValue('--page-bg').trim() || '#3D4A45';
+              const c = doc.querySelector('#main-card');
+              if (c) {
+                c.style.maxHeight='none';
+                c.style.background='#000';
+                c.style.boxShadow='0 12px 40px rgba(0,0,0,.55)';
+                const list=c.querySelector('#homework-list');
+                if (list) list.style.overflow='visible';
+              }
+              // 隱藏輸入列（clone 裡也藏）
+              doc.querySelector('#homework-input-area')?.remove();
+            }
+          });
+          const a=document.createElement('a');
+          a.download=`聯絡簿_${ts}.png`;
+          a.href=canvas.toDataURL('image/png');
+          document.body.appendChild(a); a.click(); a.remove();
+        }catch(e){ alert('匯出圖片失敗：'+(e?.message||e)); }
+        finally{
+          if (bar) bar.style.display = prevDisplay ?? '';
+          exportPngBtn.disabled=false; exportPngBtn.textContent=old;
+        }
+      });
+
+      // 匯出整頁 PNG：實色底、不透明；同樣隱藏輸入列
+      exportFullPngBtn.addEventListener('click', async () => {
+        ensureDate();
+        if (typeof html2canvas !== 'function') return alert('匯出模組未載入，請檢查網路');
+        const d = new Date(dateSelector.value + 'T00:00:00');
+        const ts = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+        const old = exportFullPngBtn.textContent; exportFullPngBtn.disabled = true; exportFullPngBtn.textContent = '匯出中…';
+
+        const bar = $('#homework-input-area');
+        const prevDisplay = bar?.style.display;
+        if (bar) bar.style.display = 'none';
+
+        try{
+          const node = $('.container');
+          const canvas = await html2canvas(node,{
+            scale: Math.min(window.devicePixelRatio||1,2.5),
+            useCORS: true,
+            backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--page-bg').trim() || '#3D4A45',
+            logging: false,
+            onclone:(doc)=>{
+              doc.body.style.backgroundImage='none';
+              doc.body.style.background=getComputedStyle(document.documentElement).getPropertyValue('--page-bg').trim() || '#3D4A45';
+              const c=doc.querySelector('#main-card');
+              if (c) {
+                c.style.maxHeight='none';
+                c.style.background='#000';
+                c.style.boxShadow='0 12px 40px rgba(0,0,0,.55)';
+                const list=c.querySelector('#homework-list');
+                if (list) list.style.overflow='visible';
+              }
+              doc.querySelector('#homework-input-area')?.remove();
+              doc.getElementById('template-modal')?.classList.remove('visible');
+            }
+          });
+          const a=document.createElement('a');
+          a.download=`聯絡簿整頁_${ts}.png`;
+          a.href=canvas.toDataURL('image/png');
+          document.body.appendChild(a); a.click(); a.remove();
+        }catch(e){ alert('匯出整頁圖片失敗：'+(e?.message||e)); }
+        finally{
+          if (bar) bar.style.display = prevDisplay ?? '';
+          exportFullPngBtn.disabled=false; exportFullPngBtn.textContent=old;
+        }
+      });
+
+      // 其他
+      $('#clear-today-btn').addEventListener('click', () => {
+        ensureDate();
+        if (!confirm(`確定要清空 ${dateSelector.value} 的事項嗎？`)) return;
+        allData[currentDate] = [];
+        renderHomeworkList([]);
+        saveData();
+      });
+
+      togglePresentationBtn.addEventListener('click', togglePresentation);
+      document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement && isPresentationMode) togglePresentation(); });
+      toggleVerticalBtn.addEventListener('click', toggleVertical);
+      fontSizeSlider.addEventListener('input', e => applyAndSaveFontSize(e.target.value));
+
+      // 初始化
+      const init = () => {
+        updateDate(currentDate);
+        loadData();
+        loadPreferences();
+        initTemplateModal();
+        // 若初次載入 date 為空，補值
+        requestAnimationFrame(()=>{ if (!dateSelector.value) dateSelector.value=currentDate; });
+      };
+      init();
+
+      // 新增事項：支援 Enter（排除中文輸入法合成中）
+      newHomeworkInput.addEventListener('keydown', e => {
+        if (e.key==='Enter' && !e.isComposing) { e.preventDefault(); addHomework(newHomeworkInput.value); }
+      });
+      addItemBtn.addEventListener('click', () => addHomework(newHomeworkInput.value));
     });
   </script>
 </body>
