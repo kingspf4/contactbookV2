@@ -2,172 +2,145 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>智慧聯絡簿 v20.7（白底＋字色編輯＋高對比匯圖）</title>
-
-  <!-- 備援字型（若系統沒有微軟正黑體） -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>智慧聯絡簿 v20.6（白底黑字＋局部字色＋高對比匯圖）</title>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
-
-  <!-- 匯圖 -->
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-
   <style>
-    /* v20.7：白底黑字、字色編輯器、保留拖曳/前日複製/直書/字級/全螢幕/PNG 匯出（可強制純黑） */
+    /* v20.6: 白底黑字、局部字色選擇器、匯出時強制純黑、維持 Enter 換行與拖曳排序 */
     @font-face{
       font-family:'NumericAndLatinFont';
       src: local('Microsoft JhengHei'), local('Inter'), local('Arial');
       unicode-range: U+0020-007F;
     }
     :root{
-      --primary-color:#4091ff;
-      --page-bg:#ffffff;            /* 網頁背景（白） */
-      --card-bg:#ffffff;            /* 卡片底（白） */
+      --primary-color:#2b7de9; /* 藍色更穩重 */
+      --page-bg:#ffffff;       /* 頁面白底 */
+      --card-bg:#ffffff;       /* 卡片白底 */
       --card-border:rgba(0,0,0,.12);
-      --text-color-primary:#111111; /* 預設深黑 */
+      --text-color-primary:#000000;           /* 主文字黑 */
       --text-color-secondary:rgba(0,0,0,.6);
-      --input-bg:rgba(0,0,0,.04);
+      --input-bg:rgba(0,0,0,.05);
       --shadow-color:rgba(0,0,0,.08);
-      --control-radius:14px;
+      --control-border-radius:14px;
+      --delete-color:#d92c2c;
+      --item-font-size:1.5em;
       --danger:#ff5c5c;
-      --item-font-size:1.6em;
     }
-
-    *{ box-sizing:border-box }
-    html,body{ height:100%; margin:0 }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0}
     body{
       font-family:'Microsoft JhengHei','Noto Sans TC',sans-serif;
       color:var(--text-color-primary);
-      background:var(--page-bg);
       -webkit-font-smoothing:antialiased;
-      padding:24px 24px 110px;
-      display:flex; align-items:center; justify-content:center;
+      background:var(--page-bg);
+      padding:22px 22px 100px;
+      display:flex;align-items:center;justify-content:center
     }
-
-    .container{ max-width:1100px; width:100% }
-    .main-header{ text-align:center; margin-bottom:22px }
-    .main-title{
-      font-family:'ZCOOL KuaiLe','Microsoft JhengHei','Noto Sans TC',sans-serif;
-      font-size:3rem; line-height:1.1; margin:0;
-      color:var(--text-color-primary);
-    }
+    .container{max-width:980px;width:100%}
+    .main-header{text-align:center;margin-bottom:18px}
+    .main-title{font-family:'ZCOOL KuaiLe','Microsoft JhengHei','Noto Sans TC',sans-serif;font-size:2.6em;font-weight:900;color:#111;text-shadow:none}
 
     .card{
       background:var(--card-bg);
-      border:1px solid var(--card-border);
-      border-radius:28px;
-      box-shadow:0 30px 90px var(--shadow-color);
-      padding:28px;
-      display:flex; flex-direction:column;
-      min-height:620px; max-height:80vh;
-      animation:fadeIn .4s ease;
+      border-radius:26px;border:1px solid var(--card-border);
+      box-shadow:0 10px 30px 0 var(--shadow-color);
+      padding:26px;animation:fadeIn .6s cubic-bezier(.2,.8,.2,1);
+      display:flex;flex-direction:column;min-height:620px;max-height:72vh
     }
-    @keyframes fadeIn{ from{opacity:.0; transform:translateY(8px)} to{opacity:1; transform:none} }
+    @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+    @keyframes itemFadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
 
-    .card-header{
-      text-align:center; margin-bottom:18px; padding-bottom:18px;
-      border-bottom:1px solid var(--card-border);
-      flex-shrink:0;
-    }
-    #date-selector{
-      background:none; border:none; font-size:2.2rem; font-weight:800;
-      color:var(--text-color-primary); text-align:center; cursor:pointer;
-    }
-    #date-selector::-webkit-calendar-picker-indicator{ filter:invert(0); cursor:pointer; transform:scale(1.15) }
-    #week-display{ font-size:1.1rem; color:var(--text-color-secondary); margin-top:8px }
+    .card-header{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;align-items:center;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--card-border);flex-shrink:0}
+    #date-selector{background:none;border:none;color:var(--text-color-primary);font-size:2.1em;font-weight:700;text-align:center;cursor:pointer;padding:4px 6px;border-radius:10px}
+    #date-selector::-webkit-calendar-picker-indicator{cursor:pointer;transform:scale(1.2)}
+    #week-display{font-size:1.05em;font-weight:500;color:var(--text-color-secondary);margin-top:2px}
+    .nav-date-group{display:flex;gap:8px}
+    .nav-date-group button{padding:10px 14px}
 
-    /* 清單 */
-    .homework-list{
-      list-style:none; padding:0; margin:0;
-      display:flex; flex-direction:column; gap:12px;
-      flex-grow:1; overflow:auto; padding:6px; margin:0 -6px;
-    }
+    .homework-list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:12px;flex-grow:1;overflow:auto;padding:6px;margin:0 -6px}
     .homework-item{
-      font-family:'NumericAndLatinFont','Microsoft JhengHei','Noto Sans TC',sans-serif;
+      font-family:'NumericAndLatinFont','Microsoft JhengHei','ZCOOL KuaiLe','Noto Sans TC',sans-serif;
       font-size:var(--item-font-size);
-      display:flex; align-items:center; gap:10px;
-      padding:10px 12px; border-radius:var(--control-radius);
-      border:1px dashed transparent; transition:.2s background-color, .2s box-shadow;
+      display:flex;align-items:center;gap:10px;
+      padding:10px 12px;border-radius:var(--control-border-radius);
+      transition:background-color .2s ease, box-shadow .2s ease;
+      animation:itemFadeIn .2s ease forwards;position:relative;border:1px dashed transparent
     }
-    .homework-item:hover,.homework-item:focus-within{ background:var(--input-bg) }
-    .homework-item .grab{ cursor:grab; user-select:none; opacity:.7 }
-    .homework-item.dragging{ opacity:.6 }
-    .homework-item.drag-over{ background:rgba(64,145,255,.06); border-color:rgba(64,145,255,.35) }
-    .item-index{ color:var(--text-color-secondary); font-weight:700 }
-    .item-content{ flex:1; outline:none }
+    .homework-item .grab{cursor:grab;user-select:none;opacity:.6}
+    .homework-item.dragging{opacity:.65}
+    .homework-item.drag-over{background:rgba(0,0,0,.04);border-color:rgba(0,0,0,.2)}
+    .homework-item .item-content{
+      flex:1; outline:none; white-space:pre-wrap;  /* 允許 Enter 換行 */
+      min-height:1.2em;
+    }
+    .homework-item:hover,.homework-item:focus-within{background-color:rgba(0,0,0,.03)}
+    .item-index{font-family:'NumericAndLatinFont','Microsoft JhengHei','Inter',sans-serif;font-weight:600;color:var(--text-color-secondary)}
 
-    /* 輸入列 */
     #homework-input-area{
-      display:flex; gap:0; background:var(--input-bg);
+      display:flex;gap:6px;background-color:var(--input-bg);
+      border-radius:var(--control-border-radius);
       border:1px solid rgba(0,0,0,.08);
-      border-radius:var(--control-radius);
-      transition:box-shadow .25s ease; flex-shrink:0; margin-top:16px;
+      transition:box-shadow .25s ease;flex-shrink:0;margin-top:16px;padding:8px
     }
-    #homework-input-area:focus-within{ box-shadow:0 0 0 4px rgba(64,145,255,.25) }
+    #homework-input-area:focus-within{box-shadow:0 0 0 4px rgba(43,125,233,.22)}
     #new-homework-input{
-      flex:1; background:none; border:none; padding:12px 16px; font-size:1.15rem;
-      color:var(--text-color-primary);
-      font-family:'NumericAndLatinFont','Microsoft JhengHei','Noto Sans TC',sans-serif;
-      outline:none;
+      flex:1;background:#fff;border:1px solid rgba(0,0,0,.12);border-radius:10px;
+      padding:10px 12px;font-size:1.05em;color:#111;
+      font-family:'NumericAndLatinFont','Microsoft JhengHei','ZCOOL KuaiLe','Noto Sans TC',sans-serif
     }
-    .add-btn{ background:var(--primary-color); color:#fff; border-radius:0 var(--control-radius) var(--control-radius) 0 }
+    #new-homework-input:focus{outline:none;border-color:#2b7de9;box-shadow:0 0 0 3px rgba(43,125,233,.18)}
+    .add-btn{background:var(--primary-color);color:#fff}
 
-    /* 工具列 */
-    .footer{
-      margin-top:16px; display:flex; flex-wrap:wrap; gap:10px; align-items:center;
-    }
-    .footer .row{ display:flex; gap:10px; flex:1; flex-wrap:wrap }
-    button{
-      border:none; border-radius:var(--control-radius);
-      padding:10px 14px; font-weight:700; cursor:pointer;
-      transition:transform .08s ease, box-shadow .2s ease, background .2s ease, color .2s ease;
-    }
-    .btn-primary{ background:var(--primary-color); color:#fff }
-    .btn-secondary{ background:rgba(0,0,0,.06); color:var(--text-color-primary); border:1px solid rgba(0,0,0,.08) }
-    .btn-danger{ background:rgba(255,92,92,.12); color:#a40000; border:1px solid rgba(255,92,92,.35) }
-    button:active{ transform:scale(.98) }
+    button{border:none;font-weight:600;cursor:pointer;transition:all .2s ease;border-radius:12px!important;padding:10px 14px}
+    .btn-primary{background:var(--primary-color);color:#fff}
+    .btn-secondary{background:rgba(0,0,0,.06);color:#111;border:1px solid rgba(0,0,0,.12)}
+    .btn-danger{background:rgba(217,44,44,.08);color:#b21f1f;border:1px solid rgba(217,44,44,.25)}
+    .delete-item-btn{opacity:0;background:none;color:rgba(0,0,0,.55);font-size:1.1em;line-height:1;padding:4px 8px}
+    .homework-item:hover .delete-item-btn{opacity:1}
+    .delete-item-btn:hover{color:#b21f1f;transform:scale(1.08)}
 
-    /* 字級、字色 */
-    .font-tools{
-      display:flex; align-items:center; gap:10px;
-      background:rgba(0,0,0,.04); padding:8px 12px;
-      border-radius:var(--control-radius); border:1px solid rgba(0,0,0,.08);
+    .footer-buttons{display:grid;grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));gap:10px;margin-top:14px;align-items:center}
+    .font-slider-container{display:flex;align-items:center;gap:10px;background:rgba(0,0,0,.06);padding:8px 12px;border:1px solid rgba(0,0,0,.1);border-radius:12px}
+    .font-slider-container label{font-family:'ZCOOL KuaiLe','Microsoft JhengHei','Noto Sans TC',sans-serif;font-size:1.05em;font-weight:700}
+    #font-size-slider{width:100%;-webkit-appearance:none;background:transparent}
+    #font-size-slider:focus{outline:none}
+    #font-size-slider::-webkit-slider-runnable-track{height:4px;background:rgba(0,0,0,.25);border-radius:5px}
+    #font-size-slider::-webkit-slider-thumb{-webkit-appearance:none;height:18px;width:18px;background:var(--primary-color);border-radius:50%;margin-top:-7px;cursor:pointer}
+
+    /* 局部字色工具 */
+    .color-tools{display:flex;gap:8px;align-items:center;justify-content:center}
+    .color-tools select, .color-tools input[type="color"]{
+      padding:8px 10px;border-radius:10px;border:1px solid rgba(0,0,0,.12);background:#fff;cursor:pointer
     }
-    .font-tools label{ color:var(--text-color-secondary); font-weight:700 }
-    #font-size-slider{ width:160px; -webkit-appearance:none; background:transparent }
-    #font-size-slider::-webkit-slider-runnable-track{ height:4px; background:rgba(0,0,0,.25); border-radius:4px }
-    #font-size-slider::-webkit-slider-thumb{ -webkit-appearance:none; height:18px; width:18px; background:var(--primary-color); border-radius:50%; margin-top:-7px; cursor:pointer }
-    #font-color-input{ width:42px; height:32px; border:none; background:transparent; padding:0; cursor:pointer }
+
+    .creator-credit{display:none!important}
 
     /* 直書模式 */
-    .vertical-mode{ flex-direction:row-reverse; align-items:flex-start; overflow-x:auto; overflow-y:hidden; gap:18px }
-    .vertical-mode .homework-item{ flex-direction:column; min-width:110px; min-height:420px; height:98%; padding:18px 14px }
-    .vertical-mode .item-index{ border-bottom:1px solid rgba(0,0,0,.12); padding-bottom:8px; margin-bottom:10px }
-    .vertical-mode .item-content{ writing-mode:vertical-rl; text-align:right; max-height:260px; overflow:auto }
-    .vertical-mode .horizontal-in-vertical{ writing-mode:horizontal-tb; display:inline-block; text-orientation:mixed }
-    .vertical-mode .delete-item-btn{ opacity:1; align-self:center; padding:4px 6px }
+    .vertical-mode{flex-direction:row-reverse;align-items:flex-start;overflow-x:auto;overflow-y:hidden;gap:20px}
+    .vertical-mode .homework-item{display:flex;flex-direction:column;justify-content:space-between;align-items:stretch;width:auto;min-width:110px;height:98%;min-height:420px;flex-shrink:0;padding:20px 15px}
+    .vertical-mode .item-index{border-bottom:1px solid rgba(0,0,0,.2);padding-bottom:10px;margin-bottom:15px}
+    .vertical-mode .item-content{writing-mode:vertical-rl;overflow-y:auto;text-align:right;max-height:260px;width:auto}
+    .vertical-mode .horizontal-in-vertical{writing-mode:horizontal-tb;display:inline-block;text-orientation:mixed}
+    .vertical-mode .delete-item-btn{opacity:1;padding:5px;align-self:center}
+    .vertical-mode>p{writing-mode:vertical-rl;text-orientation:upright;margin:0 auto;align-self:center}
 
-    /* 範本 modal */
-    #template-modal{ display:none; position:fixed; inset:0; background:rgba(0,0,0,.38); align-items:center; justify-content:center; z-index:10; opacity:0; transition:opacity .25s ease }
-    #template-modal.visible{ display:flex; opacity:1 }
-    .template-card{ background:#fff; color:#111; border-radius:24px; width:min(860px,92vw); padding:26px; box-shadow:0 30px 90px rgba(0,0,0,.25) }
-    .category-tabs{ display:flex; flex-wrap:wrap; gap:10px; padding-bottom:14px; border-bottom:1px solid #e6e6e6; margin-bottom:16px }
-    .tab-btn{ background:#f3f5f8; color:#111; border:1px solid #eaecef; border-radius:10px; padding:8px 12px; font-weight:700 }
-    .tab-btn.active{ background:#e7f0ff; border-color:#c9defe }
-    .templates-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:12px; max-height:45vh; overflow:auto }
-    .template-item{ background:#f8fafc; border:1px solid #eaecef; color:#111; text-align:left; padding:12px; border-radius:12px; font-size:1.05rem }
-    .template-item:hover{ background:#e7f0ff }
+    /* 範本 Modal */
+    #template-modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);background:rgba(0,0,0,.35);align-items:center;justify-content:center;z-index:10;opacity:0;transition:opacity .25s ease}
+    #template-modal.visible{display:flex;opacity:1}
+    .template-card{padding:26px;max-width:820px;width:90%;background:#fff;border-radius:18px;border:1px solid rgba(0,0,0,.12)}
+    .category-tabs{display:flex;flex-wrap:wrap;gap:10px;border-bottom:1px solid rgba(0,0,0,.12);padding-bottom:12px;margin-bottom:16px}
+    .tab-btn{background:rgba(0,0,0,.06);color:#111;padding:10px 14px;border-radius:10px;font-weight:700;border:1px solid rgba(0,0,0,.1)}
+    .tab-btn.active{background:var(--primary-color);color:#fff;border-color:transparent}
+    .templates-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;max-height:45vh;overflow-y:auto;padding-right:10px;font-family:'NumericAndLatinFont','Microsoft JhengHei','ZCOOL KuaiLe','Noto Sans TC',sans-serif}
+    .template-item{background:#fff;border:1px solid rgba(0,0,0,.1);color:#111;text-align:left;padding:14px;border-radius:10px;font-size:1.1em}
+    .template-item:hover{background:var(--primary-color);color:#fff}
 
-    .delete-item-btn{ opacity:0; background:none; color:#b40000; font-size:1.1em; line-height:1; padding:4px 8px }
-    .homework-item:hover .delete-item-btn{ opacity:1 }
-
-    .creator-credit{ display:none !important }
-
-    @media (max-width:520px){
-      .main-title{ font-size:2.2rem }
-      #date-selector{ font-size:1.6rem }
-      .card{ min-height:560px }
-      .font-tools{ flex-wrap:wrap }
+    @media (max-width: 520px){
+      .main-title{font-size:2.2em}
+      #date-selector{font-size:1.6em}
+      .card{min-height:560px}
     }
   </style>
 </head>
@@ -176,12 +149,11 @@
     <div class="main-header"><h1 class="main-title">智慧聯絡簿</h1></div>
 
     <div class="card" id="main-card">
-      <!-- 日期區：新增上一日 / 下一日 -->
       <div class="card-header">
-        <div style="display:flex; align-items:center; justify-content:center; gap:10px; flex-wrap:wrap">
-          <button id="prev-day-btn" class="btn-secondary" title="上一日">← 上一日</button>
+        <div class="nav-date-group">
+          <button id="prev-day-btn" class="btn-secondary" title="上一日">◀ 上一日</button>
           <input type="date" id="date-selector" aria-label="選擇日期">
-          <button id="next-day-btn" class="btn-secondary" title="下一日">下一日 →</button>
+          <button id="next-day-btn" class="btn-secondary" title="下一日">下一日 ▶</button>
         </div>
         <div id="week-display" aria-live="polite"></div>
       </div>
@@ -195,75 +167,73 @@
       </div>
     </div>
 
-    <!-- 工具列 -->
-    <div class="footer">
-      <div class="row">
-        <button id="toggle-vertical-btn" class="btn-secondary" aria-pressed="false">切換直書</button>
+    <div class="footer-buttons">
+      <button id="toggle-vertical-btn" class="btn-secondary" aria-pressed="false">切換直書</button>
 
-        <div class="font-tools">
-          <label for="font-size-slider">字級</label>
-          <input type="range" id="font-size-slider" min="1" max="2.8" step="0.1" value="1.6" aria-label="字級大小">
-          <label for="font-color-input">字色</label>
-          <input type="color" id="font-color-input" value="#111111" title="選擇字體顏色">
-          <label style="display:flex; align-items:center; gap:6px; user-select:none">
-            <input type="checkbox" id="force-black-export" checked>
-            匯圖用純黑字
-          </label>
-        </div>
-
-        <button id="toggle-presentation-btn" class="btn-secondary">全螢幕展示</button>
+      <div class="font-slider-container">
+        <label for="font-size-slider">字級</label>
+        <input type="range" id="font-size-slider" min="1" max="2.6" step="0.1" value="1.5" aria-label="字級大小">
       </div>
 
-      <div class="row">
-        <button id="copy-text-btn" class="btn-secondary">複製文字</button>
-        <button id="copy-prev-btn" class="btn-secondary">複製前日</button>
-
-        <button id="export-png-btn" class="btn-primary">匯出圖片（PNG）</button>
-        <button id="export-fullpng-btn" class="btn-secondary">匯出整頁（PNG）</button>
-
-        <button id="clear-today-btn" class="btn-danger">清空今日</button>
+      <!-- 局部字色工具：可選常用色＋自由取色 -->
+      <div class="color-tools">
+        <select id="color-picker" aria-label="預設字色">
+          <option value="">字色（選擇後套用到選取文字）</option>
+          <option value="#000000">黑色</option>
+          <option value="#d92c2c">紅色</option>
+          <option value="#1a73e8">藍色</option>
+          <option value="#188038">綠色</option>
+          <option value="#e37400">橙色</option>
+          <option value="#6f42c1">紫色</option>
+        </select>
+        <input type="color" id="color-custom" value="#000000" title="自訂字色（選取後套用到選取文字）">
       </div>
+
+      <button id="copy-text-btn" class="btn-secondary">複製文字</button>
+      <button id="copy-prev-btn" class="btn-secondary">複製前日</button>
+
+      <button id="export-png-btn" class="btn-primary">匯出圖片（卡片）</button>
+      <button id="export-fullpng-btn" class="btn-secondary">匯出圖片（整頁）</button>
+
+      <button id="toggle-presentation-btn" class="btn-secondary">全螢幕展示</button>
+      <button id="clear-today-btn" class="btn-danger">清空今日</button>
     </div>
   </div>
 
   <!-- 範本 Modal -->
   <div id="template-modal">
     <div class="template-card">
-      <h2 style="margin:0 0 12px 0">選擇作業範本</h2>
+      <h2 style="margin-top:0;margin-bottom:12px;">選擇作業範本</h2>
       <div id="category-tabs" class="category-tabs"></div>
       <div id="templates-grid" class="templates-grid"></div>
     </div>
   </div>
 
-  <!-- 原註記（不顯示） -->
-  <a href="https://www.facebook.com/FunFun.AI.Teacher/" target="_blank" rel="noopener noreferrer" class="creator-credit">Created by 方方老師</a>
+  <a href="#" class="creator-credit">Created by 方方老師</a>
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       document.querySelector('.creator-credit')?.remove();
-
-      // 工具
-      const $ = s => document.querySelector(s);
+      const $  = s => document.querySelector(s);
       const $$ = s => Array.from(document.querySelectorAll(s));
 
-      // DOM 抓取
+      // DOM
       const dateSelector = $('#date-selector');
-      const prevDayBtn = $('#prev-day-btn');
-      const nextDayBtn = $('#next-day-btn');
       const weekDisplay = $('#week-display');
       const homeworkList = $('#homework-list');
       const newHomeworkInput = $('#new-homework-input');
       const addItemBtn = $('#add-item-btn');
-      const togglePresentationBtn = $('#toggle-presentation-btn');
-      const toggleVerticalBtn = $('#toggle-vertical-btn');
-      const fontSizeSlider = $('#font-size-slider');
-      const fontColorInput = $('#font-color-input');
-      const forceBlackExport = $('#force-black-export');
-
       const exportPngBtn = $('#export-png-btn');
       const exportFullPngBtn = $('#export-fullpng-btn');
       const copyTextBtn = $('#copy-text-btn');
       const copyPrevBtn = $('#copy-prev-btn');
+      const togglePresentationBtn = $('#toggle-presentation-btn');
+      const toggleVerticalBtn = $('#toggle-vertical-btn');
+      const fontSizeSlider = $('#font-size-slider');
+      const prevDayBtn = $('#prev-day-btn');
+      const nextDayBtn = $('#next-day-btn');
+      const colorPicker = $('#color-picker');
+      const colorCustom = $('#color-custom');
 
       // 狀態
       const today = new Date();
@@ -271,7 +241,7 @@
       let currentDate = `${today.getFullYear()}-${pad(today.getMonth()+1)}-${pad(today.getDate())}`;
       let isPresentationMode = false;
       let isVerticalMode = false;
-      let allData = {};
+      let allData = JSON.parse(localStorage.getItem('ultraContactBook_v20_final') || '{}');
 
       // 範本
       const templates = {
@@ -282,66 +252,66 @@
         "通用":["考卷訂簽","複習 L__-`__`","預習 L__","發回條","帶__","做家事","運動30分鐘","親子共讀"]
       };
 
-      // 儲存/載入
-      const getCurrentItems = () => $$('.item-content').map(el => el.textContent.trim()).filter(Boolean);
-      const saveData = () => { allData[currentDate] = getCurrentItems(); localStorage.setItem('ultraContactBook_v20_final', JSON.stringify(allData)); };
-      const loadData = () => {
-        try{
-          const data = JSON.parse(localStorage.getItem('ultraContactBook_v20_final'));
-          if (data && typeof data === 'object') allData = data;
-        }catch(e){}
-        loadDataForDate(currentDate);
+      // 日期 & 儲存
+      const saveData = () => {
+        allData[currentDate] = getCurrentItems();
+        localStorage.setItem('ultraContactBook_v20_final', JSON.stringify(allData));
       };
-      const loadDataForDate = (date) => { renderHomeworkList(allData[date] || []); };
-
-      // 日期 & 週
+      const loadDataForDate = (date) => {
+        renderHomeworkList(allData[date] || []);
+      };
       const updateDate = (dateString) => {
         const d = new Date(dateString + 'T00:00:00');
         const week = ['星期日','星期一','星期二','星期三','星期四','星期五','星期六'][d.getDay()];
         weekDisplay.textContent = week;
         dateSelector.value = dateString;
       };
-      const ensureDate = () => { if (!dateSelector.value) dateSelector.value = currentDate; };
+      const ensureDate = () => { if (!dateSelector.value) { dateSelector.value = currentDate; } };
       const fmt = (d) => { const p=n=>String(n).padStart(2,'0'); return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`; };
-      const stepDate = (delta) => {
-        saveData();
-        const [y,m,dd] = dateSelector.value.split('-').map(Number);
-        const d = new Date(y, m-1, dd);
-        d.setDate(d.getDate()+delta);
-        currentDate = fmt(d);
-        updateDate(currentDate);
-        loadDataForDate(currentDate);
-      };
+      const getPrevDate = (dateStr) => { const [y,m,dd]=dateStr.split('-').map(Number); const d=new Date(y,m-1,dd); d.setDate(d.getDate()-1); return fmt(d); };
+      const getNextDate = (dateStr) => { const [y,m,dd]=dateStr.split('-').map(Number); const d=new Date(y,m-1,dd); d.setDate(d.getDate()+1); return fmt(d); };
 
-      // 直書中的橫排片段
+      // 直書處理：保留換行
       const processTextForVertical = (text) => {
         const regex = /([a-zA-Z0-9\s._'`-]+)/g;
-        return text.split(regex).map(seg => seg.match(regex) && seg.trim()!=='' ? `<span class="horizontal-in-vertical">${seg}</span>` : `<span>${seg}</span>`).join('');
+        return text
+          .split('\n') // 先切行
+          .map(line =>
+            line.split(regex).map(seg =>
+              (regex.test(seg) && seg.trim()!=='')
+                ? `<span class="horizontal-in-vertical">${seg}</span>`
+                : `<span>${seg}</span>`
+            ).join('')
+          ).join('<br>');
       };
 
-      // 渲染清單
+      // 取目前項目（純文字）
+      const getCurrentItems = () =>
+        $$('.item-content').map(el => el.textContent.replace(/\u00A0/g,' ').trim()).filter(Boolean);
+
+      // 渲染
       const renderHomeworkList = (items) => {
         homeworkList.innerHTML = '';
         if (!items || items.length === 0) {
-          homeworkList.innerHTML = `<p style="font-size:1rem; text-align:center; margin:auto; color:var(--text-color-secondary)">點擊下方輸入框新增今日聯絡事項</p>`;
+          homeworkList.innerHTML = `<p style="font-family:'Microsoft JhengHei','Noto Sans TC',sans-serif;font-size:1rem;text-align:center;margin:auto;color:#666;">點擊下方輸入框新增今日聯絡事項</p>`;
           return;
         }
         items.forEach((text, idx) => {
           const li = document.createElement('li');
           li.className = 'homework-item';
           li.setAttribute('draggable','true');
-          const contentHTML = isVerticalMode ? processTextForVertical(text) : text;
+          const contentHTML = isVerticalMode ? processTextForVertical(text) : text.replace(/</g,'&lt;').replace(/>/g,'&gt;');
           li.innerHTML = `
             <span class="grab" title="拖曳排序">☰</span>
             <span class="item-index">${idx+1}.</span>
             <span class="item-content" contenteditable="true">${contentHTML}</span>
-            <button class="delete-item-btn" title="刪除">×</button>
+            <button class="delete-item-btn" title="刪除">&times;</button>
           `;
           homeworkList.appendChild(li);
         });
       };
 
-      // 新增
+      // 新增一筆
       const addHomework = (text) => {
         const t = (text||'').trim();
         if (!t) return;
@@ -353,7 +323,7 @@
         newHomeworkInput.focus();
       };
 
-      // 模式
+      // 模式切換
       const togglePresentation = () => {
         isPresentationMode = !isPresentationMode;
         document.body.classList.toggle('presentation-mode', isPresentationMode);
@@ -368,19 +338,8 @@
         toggleVerticalBtn.textContent = isVerticalMode ? '切換橫書' : '切換直書';
         renderHomeworkList(getCurrentItems());
       };
-
-      // 偏好（字級、字色）
-      const applyFontSize = (size) => { document.documentElement.style.setProperty('--item-font-size', `${size}em`); };
-      const applyFontColor = (hex) => {
-        document.documentElement.style.setProperty('--text-color-primary', hex);
-        // 依主色自動調整次要色（簡單比例）
-        const secondary = hex === '#000000' ? 'rgba(0,0,0,.6)' : 'rgba(0,0,0,.6)';
-        document.documentElement.style.setProperty('--text-color-secondary', secondary);
-      };
-      const loadPreferences = () => {
-        const s = localStorage.getItem('fontSizePreference_v20'); if (s){ fontSizeSlider.value = s; applyFontSize(s); }
-        const c = localStorage.getItem('fontColorPreference_v20'); if (c){ fontColorInput.value = c; applyFontColor(c); }
-      };
+      const applyAndSaveFontSize = (size) => { document.documentElement.style.setProperty('--item-font-size', `${size}em`); localStorage.setItem('fontSizePreference_v20', size); };
+      const loadPreferences = () => { const s = localStorage.getItem('fontSizePreference_v20'); if (s) { fontSizeSlider.value = s; applyAndSaveFontSize(s); } };
 
       // 範本 Modal
       const initTemplateModal = () => {
@@ -391,11 +350,10 @@
         let isInitialized = false;
         const show = () => modal.classList.add('visible');
         const hide = () => modal.classList.remove('visible');
-
         const renderCategory = (cat) => {
-          categoryTabs.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+          categoryTabs.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
           categoryTabs.querySelector(`.tab-btn[data-category="${cat}"]`)?.classList.add('active');
-          templatesGrid.innerHTML = '';
+          templatesGrid.innerHTML='';
           (templates[cat]||[]).forEach(t => {
             const btn = document.createElement('button');
             btn.className = 'template-item';
@@ -404,12 +362,11 @@
             templatesGrid.appendChild(btn);
           });
         };
-
         showTemplateBtn.addEventListener('click', () => {
           if (!isInitialized) {
             Object.keys(templates).forEach(cat => {
               const tab = document.createElement('button');
-              tab.className = 'tab-btn'; tab.textContent = cat; tab.dataset.category = cat;
+              tab.className='tab-btn'; tab.textContent = cat; tab.dataset.category = cat;
               tab.onclick = () => renderCategory(cat);
               categoryTabs.appendChild(tab);
             });
@@ -422,7 +379,7 @@
         document.addEventListener('keydown', e => { if (e.key === 'Escape') hide(); });
       };
 
-      // 事件：刪除/編輯/貼上純文字
+      // 清單事件：刪除 / 編輯儲存 / 貼上純文字 / 拖曳排序
       homeworkList.addEventListener('click', e => {
         if (e.target.classList.contains('delete-item-btn')) {
           const item = e.target.closest('.homework-item');
@@ -433,10 +390,8 @@
           saveData();
         }
       });
+      // 允許 Enter 換行 → 不攔截 Enter
       homeworkList.addEventListener('focusout', e => { if (e.target.classList.contains('item-content')) saveData(); });
-      homeworkList.addEventListener('keydown', e => {
-        if (e.target.classList.contains('item-content') && e.key === 'Enter' && !e.isComposing) { e.preventDefault(); e.target.blur(); }
-      });
       homeworkList.addEventListener('paste', e => {
         if (e.target.classList.contains('item-content')) {
           e.preventDefault();
@@ -444,11 +399,10 @@
           document.execCommand('insertText', false, text);
         }
       });
-
-      // 拖曳排序
       let dragIndex = null;
       homeworkList.addEventListener('dragstart', e => {
-        const li = e.target.closest('.homework-item'); if (!li) return;
+        const li = e.target.closest('.homework-item');
+        if (!li) return;
         li.classList.add('dragging');
         dragIndex = $$('.homework-item').indexOf(li);
         e.dataTransfer.effectAllowed = 'move';
@@ -460,7 +414,8 @@
       });
       homeworkList.addEventListener('dragover', e => {
         e.preventDefault();
-        const li = e.target.closest('.homework-item'); if (!li) return;
+        const li = e.target.closest('.homework-item');
+        if (!li) return;
         $$('.homework-item').forEach(x=>x.classList.remove('drag-over'));
         li.classList.add('drag-over');
         e.dataTransfer.dropEffect = 'move';
@@ -481,36 +436,33 @@
 
       // 初始化
       updateDate(currentDate);
-      loadData();
+      loadDataForDate(currentDate);
       loadPreferences();
       initTemplateModal();
       requestAnimationFrame(() => ensureDate());
 
-      // 新增
+      // 新增與日期切換
       addItemBtn.addEventListener('click', () => addHomework(newHomeworkInput.value));
-      newHomeworkInput.addEventListener('keydown', e => { if (e.key==='Enter' && !e.isComposing) { e.preventDefault(); addHomework(newHomeworkInput.value); } });
-
-      // 日期切換
+      newHomeworkInput.addEventListener('keydown', e => {
+        if (e.key==='Enter' && !e.isComposing) { e.preventDefault(); document.execCommand('insertLineBreak'); }
+      });
       dateSelector.addEventListener('change', e => { saveData(); currentDate = e.target.value; updateDate(currentDate); loadDataForDate(currentDate); });
-      prevDayBtn.addEventListener('click', () => stepDate(-1));
-      nextDayBtn.addEventListener('click', () => stepDate(+1));
 
-      // 模式 & 字級/字色
-      togglePresentationBtn.addEventListener('click', togglePresentation);
-      document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement && isPresentationMode) togglePresentation(); });
-      toggleVerticalBtn.addEventListener('click', toggleVertical);
-      fontSizeSlider.addEventListener('input', e => {
-        const v = e.target.value;
-        applyFontSize(v);
-        localStorage.setItem('fontSizePreference_v20', v);
+      // 上一日 / 下一日（不支援鍵盤左右鍵）
+      prevDayBtn.addEventListener('click', () => {
+        saveData();
+        currentDate = getPrevDate(currentDate);
+        updateDate(currentDate);
+        loadDataForDate(currentDate);
       });
-      fontColorInput.addEventListener('input', e => {
-        const hex = e.target.value;
-        applyFontColor(hex);
-        localStorage.setItem('fontColorPreference_v20', hex);
+      nextDayBtn.addEventListener('click', () => {
+        saveData();
+        currentDate = getNextDate(currentDate);
+        updateDate(currentDate);
+        loadDataForDate(currentDate);
       });
 
-      // 文字複製
+      // 複製文字（純文字）
       copyTextBtn.addEventListener('click', async () => {
         ensureDate();
         const d = new Date(dateSelector.value + 'T00:00:00');
@@ -521,15 +473,22 @@
         try{ await navigator.clipboard.writeText(text); alert('已複製到剪貼簿'); } catch{ prompt('複製失敗，請手動複製：', text); }
       });
 
-      // 前日複製（尋找最近 60 天內有資料者）
-      const getPrevDateStr = (dateStr) => { const [y,m,dd]=dateStr.split('-').map(Number); const d=new Date(y,m-1,dd); d.setDate(d.getDate()-1); return fmt(d); };
-      const findPreviousDateWithData = (dateStr, limit=60) => { let d=dateStr; for(let i=0;i<limit;i++){ d=getPrevDateStr(d); const arr=allData?.[d]; if(Array.isArray(arr)&&arr.length>0) return d; } return null; };
+      // 複製前日（找最近有資料的日子）
+      const findPreviousDateWithData = (dateStr, limit=60) => {
+        let d=dateStr;
+        for(let i=0;i<limit;i++){
+          d=getPrevDate(d);
+          const arr=allData?.[d];
+          if(Array.isArray(arr)&&arr.length>0) return d;
+        }
+        return null;
+      };
       copyPrevBtn.addEventListener('click', () => {
         ensureDate();
         const prev = findPreviousDateWithData(currentDate, 60);
-        if (!prev) return alert('找不到前日的聯絡事項（最近 60 天都沒有資料）。');
+        if (!prev) { alert('找不到前日的聯絡事項（最近 60 天都沒有資料）。'); return; }
         const prevItems = (allData[prev] || []).slice();
-        if (prevItems.length === 0) return alert(`${prev} 沒有項目可複製。`);
+        if (prevItems.length === 0) { alert(`${prev} 沒有項目可複製。`); return; }
         const replace = confirm(`找到 ${prev} 的 ${prevItems.length} 項。\n\n按「確定」→ 覆蓋今天\n按「取消」→ 追加到今天後面`);
         const result = replace ? prevItems : [...getCurrentItems(), ...prevItems];
         renderHomeworkList(result);
@@ -537,13 +496,34 @@
         alert(replace ? '已覆蓋今日項目。' : '已把前日項目追加到今天。');
       });
 
-      // 匯出（卡片 PNG）
-      const exportCardAsPng = async () => {
+      // 直書 / 字級
+      togglePresentationBtn.addEventListener('click', togglePresentation);
+      document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement && isPresentationMode) togglePresentation(); });
+      toggleVerticalBtn.addEventListener('click', toggleVertical);
+      fontSizeSlider.addEventListener('input', e => applyAndSaveFontSize(e.target.value));
+
+      // 局部字色：預設色清單
+      const applyColorToSelection = (color) => {
+        if (!color) return;
+        // 讓 execCommand 作用在 contenteditable 範圍
+        document.execCommand('styleWithCSS', false, true);
+        document.execCommand('foreColor', false, color);
+      };
+      colorPicker.addEventListener('change', () => {
+        applyColorToSelection(colorPicker.value);
+        colorPicker.value = "";
+      });
+      colorCustom.addEventListener('input', () => {
+        applyColorToSelection(colorCustom.value);
+      });
+
+      // 匯出 PNG（卡片）：輸出時強制白底＋文字純黑，並隱藏輸入列
+      exportPngBtn.addEventListener('click', async () => {
         ensureDate();
         if (typeof html2canvas !== 'function') return alert('匯出模組未載入，請檢查網路');
-
         const d = new Date(dateSelector.value + 'T00:00:00');
-        const ts = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+        const ts = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+        const old = exportPngBtn.textContent; exportPngBtn.disabled = true; exportPngBtn.textContent = '匯出中…';
 
         const bar = $('#homework-input-area');
         const prevDisplay = bar?.style.display;
@@ -554,50 +534,42 @@
           const canvas = await html2canvas(node,{
             scale: Math.min(window.devicePixelRatio||1,3),
             useCORS: true,
-            backgroundColor: '#ffffff', // 實色白底
+            backgroundColor: '#ffffff', // 輸出白底
             logging: false,
             onclone:(doc)=>{
+              // 全域白底
               doc.body.style.background = '#ffffff';
-
-              // 依勾選決定字色：強制純黑 或 使用當前選色
-              const chosen = fontColorInput.value || '#111111';
-              const forceBlack = forceBlackExport.checked;
-              const exportTextColor = forceBlack ? '#000000' : chosen;
-
-              const forceCss = `
-                *{ color:${exportTextColor} !important; text-shadow:none !important }
-                #main-card, .template-card{ background:#ffffff !important }
-              `;
-              const st = doc.createElement('style'); st.textContent = forceCss; doc.head.appendChild(st);
-
-              const c=doc.querySelector('#main-card');
-              if(c){
-                c.style.maxHeight='none';
-                c.style.background = '#ffffff';
-                const list=c.querySelector('#homework-list');
+              // 卡片白底
+              const card=doc.querySelector('#main-card');
+              if(card){
+                card.style.background = '#ffffff';
+                card.style.boxShadow = '0 10px 30px rgba(0,0,0,.08)';
+                const list=card.querySelector('#homework-list');
                 if(list) list.style.overflow='visible';
               }
-              doc.querySelector('#homework-input-area')?.remove();
+              // 強制所有文字純黑
+              doc.querySelectorAll('.item-content, .item-index, #week-display, #date-selector, .main-title')
+                 .forEach(el => el.style.color = '#000000');
+              // 隱藏輸入列
+              const barClone = doc.querySelector('#homework-input-area');
+              if (barClone) barClone.remove();
             }
           });
-
-          const a=document.createElement('a');
-          a.download=`聯絡簿_${ts}.png`;
-          a.href=canvas.toDataURL('image/png');
-          document.body.appendChild(a); a.click(); a.remove();
+          const a=document.createElement('a'); a.download=`聯絡簿_${ts}.png`; a.href=canvas.toDataURL('image/png'); document.body.appendChild(a); a.click(); a.remove();
         }catch(e){ alert('匯出圖片失敗：'+(e?.message||e)); }
         finally{
           if (bar) bar.style.display = prevDisplay ?? '';
+          exportPngBtn.disabled=false; exportPngBtn.textContent=old;
         }
-      };
+      });
 
-      // 匯出（整頁 PNG）
-      const exportFullAsPng = async () => {
+      // 匯出 PNG（整頁）：同上處理
+      exportFullPngBtn.addEventListener('click', async () => {
         ensureDate();
         if (typeof html2canvas !== 'function') return alert('匯出模組未載入，請檢查網路');
-
         const d = new Date(dateSelector.value + 'T00:00:00');
-        const ts = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+        const ts = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+        const old = exportFullPngBtn.textContent; exportFullPngBtn.disabled = true; exportFullPngBtn.textContent = '匯出中…';
 
         const bar = $('#homework-input-area');
         const prevDisplay = bar?.style.display;
@@ -606,49 +578,36 @@
         try{
           const node = $('.container');
           const canvas = await html2canvas(node,{
-            scale: Math.min(window.devicePixelRatio||1,2.6),
+            scale: Math.min(window.devicePixelRatio||1,2.5),
             useCORS: true,
             backgroundColor: '#ffffff',
             logging: false,
             onclone:(doc)=>{
               doc.body.style.background='#ffffff';
-
-              const chosen = fontColorInput.value || '#111111';
-              const forceBlack = forceBlackExport.checked;
-              const exportTextColor = forceBlack ? '#000000' : chosen;
-
-              const forceCss = `
-                *{ color:${exportTextColor} !important; text-shadow:none !important }
-                #main-card, .template-card{ background:#ffffff !important }
-              `;
-              const st = doc.createElement('style'); st.textContent = forceCss; doc.head.appendChild(st);
-
-              const c=doc.querySelector('#main-card');
-              if(c){
-                c.style.maxHeight='none';
-                c.style.background = '#ffffff';
-                const list=c.querySelector('#homework-list');
+              const card=doc.querySelector('#main-card');
+              if(card){
+                card.style.background = '#ffffff';
+                card.style.boxShadow = '0 10px 30px rgba(0,0,0,.08)';
+                const list=card.querySelector('#homework-list');
                 if(list) list.style.overflow='visible';
               }
-              doc.querySelector('#homework-input-area')?.remove();
-              doc.getElementById('template-modal')?.classList.remove('visible');
+              doc.querySelectorAll('.item-content, .item-index, #week-display, #date-selector, .main-title')
+                 .forEach(el => el.style.color = '#000000');
+              const barClone = doc.querySelector('#homework-input-area');
+              if (barClone) barClone.remove();
+              const modal=doc.getElementById('template-modal');
+              if(modal) modal.classList.remove('visible');
             }
           });
-
-          const a=document.createElement('a');
-          a.download=`聯絡簿整頁_${ts}.png`;
-          a.href=canvas.toDataURL('image/png');
-          document.body.appendChild(a); a.click(); a.remove();
+          const a=document.createElement('a'); a.download=`聯絡簿整頁_${ts}.png`; a.href=canvas.toDataURL('image/png'); document.body.appendChild(a); a.click(); a.remove();
         }catch(e){ alert('匯出整頁圖片失敗：'+(e?.message||e)); }
         finally{
           if (bar) bar.style.display = prevDisplay ?? '';
+          exportFullPngBtn.disabled=false; exportFullPngBtn.textContent=old;
         }
-      };
+      });
 
-      exportPngBtn.addEventListener('click', exportCardAsPng);
-      exportFullPngBtn.addEventListener('click', exportFullAsPng);
-
-      // 清空今日
+      // 其他控制
       $('#clear-today-btn').addEventListener('click', () => {
         ensureDate();
         if (!confirm(`確定要清空 ${dateSelector.value} 的事項嗎？`)) return;
