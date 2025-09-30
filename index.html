@@ -3,30 +3,31 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>智慧聯絡簿 v20.6（白底黑字＋局部字色＋高對比匯圖）</title>
+  <title>智慧聯絡簿 v20.7（放大版）</title>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <style>
-    /* v20.6: 白底黑字、局部字色選擇器、匯出時強制純黑、維持 Enter 換行與拖曳排序 */
+    /* v20.7 放大：更寬容器、更大字級、更高卡片、更大按鈕與間距 */
     @font-face{
       font-family:'NumericAndLatinFont';
       src: local('Microsoft JhengHei'), local('Inter'), local('Arial');
       unicode-range: U+0020-007F;
     }
     :root{
-      --primary-color:#2b7de9; /* 藍色更穩重 */
-      --page-bg:#ffffff;       /* 頁面白底 */
-      --card-bg:#ffffff;       /* 卡片白底 */
+      --primary-color:#2b7de9;
+      --page-bg:#ffffff;
+      --card-bg:#ffffff;
       --card-border:rgba(0,0,0,.12);
-      --text-color-primary:#000000;           /* 主文字黑 */
+      --text-color-primary:#000000;
       --text-color-secondary:rgba(0,0,0,.6);
       --input-bg:rgba(0,0,0,.05);
       --shadow-color:rgba(0,0,0,.08);
-      --control-border-radius:14px;
+      --control-border-radius:16px;        /* 角更圓 */
       --delete-color:#d92c2c;
-      --item-font-size:1.5em;
+      --item-font-size:1.9em;              /* 預設項目字更大（原 1.5） */
       --danger:#ff5c5c;
+      --space:14px;                         /* 統一間距變大 */
     }
     *{box-sizing:border-box}
     html,body{height:100%;margin:0}
@@ -35,112 +36,135 @@
       color:var(--text-color-primary);
       -webkit-font-smoothing:antialiased;
       background:var(--page-bg);
-      padding:22px 22px 100px;
+      padding:28px 28px 110px;             /* 外距加大 */
       display:flex;align-items:center;justify-content:center
     }
-    .container{max-width:980px;width:100%}
-    .main-header{text-align:center;margin-bottom:18px}
-    .main-title{font-family:'ZCOOL KuaiLe','Microsoft JhengHei','Noto Sans TC',sans-serif;font-size:2.6em;font-weight:900;color:#111;text-shadow:none}
+    .container{max-width:1180px; width:100%} /* 更寬 */
+    .main-header{text-align:center;margin-bottom:22px}
+    .main-title{
+      font-family:'ZCOOL KuaiLe','Microsoft JhengHei','Noto Sans TC',sans-serif;
+      font-size:3.2em;                     /* 標題更大 */
+      font-weight:900;color:#111;text-shadow:none;
+      letter-spacing:.5px;
+    }
 
     .card{
       background:var(--card-bg);
-      border-radius:26px;border:1px solid var(--card-border);
-      box-shadow:0 10px 30px 0 var(--shadow-color);
-      padding:26px;animation:fadeIn .6s cubic-bezier(.2,.8,.2,1);
-      display:flex;flex-direction:column;min-height:620px;max-height:72vh
+      border-radius:28px;border:1px solid var(--card-border);
+      box-shadow:0 14px 40px 0 var(--shadow-color);
+      padding:30px;animation:fadeIn .6s cubic-bezier(.2,.8,.2,1);
+      display:flex;flex-direction:column;min-height:720px;max-height:82vh; /* 更高 */
     }
     @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
     @keyframes itemFadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
 
-    .card-header{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;align-items:center;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--card-border);flex-shrink:0}
-    #date-selector{background:none;border:none;color:var(--text-color-primary);font-size:2.1em;font-weight:700;text-align:center;cursor:pointer;padding:4px 6px;border-radius:10px}
-    #date-selector::-webkit-calendar-picker-indicator{cursor:pointer;transform:scale(1.2)}
-    #week-display{font-size:1.05em;font-weight:500;color:var(--text-color-secondary);margin-top:2px}
-    .nav-date-group{display:flex;gap:8px}
-    .nav-date-group button{padding:10px 14px}
+    .card-header{
+      display:flex;flex-wrap:wrap;gap:16px;justify-content:center;align-items:center;
+      margin-bottom:18px;padding-bottom:18px;border-bottom:1px solid var(--card-border);flex-shrink:0
+    }
+    #date-selector{
+      background:none;border:none;color:var(--text-color-primary);
+      font-size:2.4em;                      /* 日期更大 */
+      font-weight:800;text-align:center;cursor:pointer;padding:6px 8px;border-radius:12px
+    }
+    #date-selector::-webkit-calendar-picker-indicator{cursor:pointer;transform:scale(1.25)}
+    #week-display{font-size:1.2em;font-weight:600;color:var(--text-color-secondary);margin-top:2px}
+    .nav-date-group{display:flex;gap:12px}
+    .nav-date-group button{padding:12px 18px;font-size:1.05em}
 
-    .homework-list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:12px;flex-grow:1;overflow:auto;padding:6px;margin:0 -6px}
+    .homework-list{
+      list-style:none;padding:0;margin:0;display:flex;flex-direction:column;
+      gap:14px;flex-grow:1;overflow:auto;padding:8px;margin:0 -8px
+    }
     .homework-item{
       font-family:'NumericAndLatinFont','Microsoft JhengHei','ZCOOL KuaiLe','Noto Sans TC',sans-serif;
       font-size:var(--item-font-size);
-      display:flex;align-items:center;gap:10px;
-      padding:10px 12px;border-radius:var(--control-border-radius);
+      display:flex;align-items:flex-start;gap:12px;
+      padding:14px 16px;border-radius:var(--control-border-radius);
       transition:background-color .2s ease, box-shadow .2s ease;
       animation:itemFadeIn .2s ease forwards;position:relative;border:1px dashed transparent
     }
-    .homework-item .grab{cursor:grab;user-select:none;opacity:.6}
+    .homework-item .grab{cursor:grab;user-select:none;opacity:.6;font-size:1.1em;line-height:1.2}
     .homework-item.dragging{opacity:.65}
     .homework-item.drag-over{background:rgba(0,0,0,.04);border-color:rgba(0,0,0,.2)}
     .homework-item .item-content{
-      flex:1; outline:none; white-space:pre-wrap;  /* 允許 Enter 換行 */
-      min-height:1.2em;
+      flex:1; outline:none; white-space:pre-wrap; min-height:1.4em; line-height:1.5;
     }
     .homework-item:hover,.homework-item:focus-within{background-color:rgba(0,0,0,.03)}
-    .item-index{font-family:'NumericAndLatinFont','Microsoft JhengHei','Inter',sans-serif;font-weight:600;color:var(--text-color-secondary)}
+    .item-index{font-family:'NumericAndLatinFont','Microsoft JhengHei','Inter',sans-serif;font-weight:700;color:var(--text-color-secondary);margin-top:2px}
 
     #homework-input-area{
-      display:flex;gap:6px;background-color:var(--input-bg);
+      display:flex;gap:10px;background-color:var(--input-bg);
       border-radius:var(--control-border-radius);
       border:1px solid rgba(0,0,0,.08);
-      transition:box-shadow .25s ease;flex-shrink:0;margin-top:16px;padding:8px
+      transition:box-shadow .25s ease;flex-shrink:0;margin-top:18px;padding:12px
     }
-    #homework-input-area:focus-within{box-shadow:0 0 0 4px rgba(43,125,233,.22)}
+    #homework-input-area:focus-within{box-shadow:0 0 0 5px rgba(43,125,233,.18)}
     #new-homework-input{
-      flex:1;background:#fff;border:1px solid rgba(0,0,0,.12);border-radius:10px;
-      padding:10px 12px;font-size:1.05em;color:#111;
+      flex:1;background:#fff;border:1px solid rgba(0,0,0,.12);border-radius:12px;
+      padding:12px 14px;font-size:1.2em;color:#111;
       font-family:'NumericAndLatinFont','Microsoft JhengHei','ZCOOL KuaiLe','Noto Sans TC',sans-serif
     }
-    #new-homework-input:focus{outline:none;border-color:#2b7de9;box-shadow:0 0 0 3px rgba(43,125,233,.18)}
+    #new-homework-input:focus{outline:none;border-color:#2b7de9;box-shadow:0 0 0 4px rgba(43,125,233,.16)}
     .add-btn{background:var(--primary-color);color:#fff}
 
-    button{border:none;font-weight:600;cursor:pointer;transition:all .2s ease;border-radius:12px!important;padding:10px 14px}
+    button{
+      border:none;font-weight:700;cursor:pointer;transition:all .2s ease;
+      border-radius:14px!important;padding:12px 16px
+    }
     .btn-primary{background:var(--primary-color);color:#fff}
     .btn-secondary{background:rgba(0,0,0,.06);color:#111;border:1px solid rgba(0,0,0,.12)}
     .btn-danger{background:rgba(217,44,44,.08);color:#b21f1f;border:1px solid rgba(217,44,44,.25)}
-    .delete-item-btn{opacity:0;background:none;color:rgba(0,0,0,.55);font-size:1.1em;line-height:1;padding:4px 8px}
+    .delete-item-btn{opacity:0;background:none;color:rgba(0,0,0,.55);font-size:1.2em;line-height:1;padding:6px 10px}
     .homework-item:hover .delete-item-btn{opacity:1}
     .delete-item-btn:hover{color:#b21f1f;transform:scale(1.08)}
 
-    .footer-buttons{display:grid;grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));gap:10px;margin-top:14px;align-items:center}
-    .font-slider-container{display:flex;align-items:center;gap:10px;background:rgba(0,0,0,.06);padding:8px 12px;border:1px solid rgba(0,0,0,.1);border-radius:12px}
-    .font-slider-container label{font-family:'ZCOOL KuaiLe','Microsoft JhengHei','Noto Sans TC',sans-serif;font-size:1.05em;font-weight:700}
+    .footer-buttons{
+      display:grid;grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap:12px;margin-top:18px;align-items:center
+    }
+    .font-slider-container{
+      display:flex;align-items:center;gap:12px;background:rgba(0,0,0,.06);
+      padding:10px 14px;border:1px solid rgba(0,0,0,.1);border-radius:14px
+    }
+    .font-slider-container label{font-family:'ZCOOL KuaiLe','Microsoft JhengHei','Noto Sans TC',sans-serif;font-size:1.1em;font-weight:800}
     #font-size-slider{width:100%;-webkit-appearance:none;background:transparent}
     #font-size-slider:focus{outline:none}
-    #font-size-slider::-webkit-slider-runnable-track{height:4px;background:rgba(0,0,0,.25);border-radius:5px}
-    #font-size-slider::-webkit-slider-thumb{-webkit-appearance:none;height:18px;width:18px;background:var(--primary-color);border-radius:50%;margin-top:-7px;cursor:pointer}
+    #font-size-slider::-webkit-slider-runnable-track{height:6px;background:rgba(0,0,0,.25);border-radius:6px}
+    #font-size-slider::-webkit-slider-thumb{-webkit-appearance:none;height:22px;width:22px;background:var(--primary-color);border-radius:50%;margin-top:-8px;cursor:pointer}
 
     /* 局部字色工具 */
-    .color-tools{display:flex;gap:8px;align-items:center;justify-content:center}
+    .color-tools{display:flex;gap:10px;align-items:center;justify-content:center}
     .color-tools select, .color-tools input[type="color"]{
-      padding:8px 10px;border-radius:10px;border:1px solid rgba(0,0,0,.12);background:#fff;cursor:pointer
+      padding:10px 12px;border-radius:12px;border:1px solid rgba(0,0,0,.12);background:#fff;cursor:pointer;font-weight:700
     }
 
     .creator-credit{display:none!important}
 
-    /* 直書模式 */
-    .vertical-mode{flex-direction:row-reverse;align-items:flex-start;overflow-x:auto;overflow-y:hidden;gap:20px}
-    .vertical-mode .homework-item{display:flex;flex-direction:column;justify-content:space-between;align-items:stretch;width:auto;min-width:110px;height:98%;min-height:420px;flex-shrink:0;padding:20px 15px}
-    .vertical-mode .item-index{border-bottom:1px solid rgba(0,0,0,.2);padding-bottom:10px;margin-bottom:15px}
-    .vertical-mode .item-content{writing-mode:vertical-rl;overflow-y:auto;text-align:right;max-height:260px;width:auto}
+    /* 直書模式（同時放大） */
+    .vertical-mode{flex-direction:row-reverse;align-items:flex-start;overflow-x:auto;overflow-y:hidden;gap:22px}
+    .vertical-mode .homework-item{display:flex;flex-direction:column;justify-content:space-between;align-items:stretch;width:auto;min-width:130px;height:98%;min-height:460px;flex-shrink:0;padding:22px 18px}
+    .vertical-mode .item-index{border-bottom:1px solid rgba(0,0,0,.2);padding-bottom:12px;margin-bottom:16px}
+    .vertical-mode .item-content{writing-mode:vertical-rl;overflow-y:auto;text-align:right;max-height:300px;width:auto;line-height:1.6}
     .vertical-mode .horizontal-in-vertical{writing-mode:horizontal-tb;display:inline-block;text-orientation:mixed}
-    .vertical-mode .delete-item-btn{opacity:1;padding:5px;align-self:center}
+    .vertical-mode .delete-item-btn{opacity:1;padding:6px;align-self:center}
     .vertical-mode>p{writing-mode:vertical-rl;text-orientation:upright;margin:0 auto;align-self:center}
 
     /* 範本 Modal */
-    #template-modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);background:rgba(0,0,0,.35);align-items:center;justify-content:center;z-index:10;opacity:0;transition:opacity .25s ease}
+    #template-modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);background:rgba(0,0,0,.2);align-items:center;justify-content:center;z-index:10;opacity:0;transition:opacity .25s ease}
     #template-modal.visible{display:flex;opacity:1}
-    .template-card{padding:26px;max-width:820px;width:90%;background:#fff;border-radius:18px;border:1px solid rgba(0,0,0,.12)}
-    .category-tabs{display:flex;flex-wrap:wrap;gap:10px;border-bottom:1px solid rgba(0,0,0,.12);padding-bottom:12px;margin-bottom:16px}
-    .tab-btn{background:rgba(0,0,0,.06);color:#111;padding:10px 14px;border-radius:10px;font-weight:700;border:1px solid rgba(0,0,0,.1)}
+    .template-card{padding:28px;max-width:920px;width:90%;background:#fff;border-radius:20px;border:1px solid rgba(0,0,0,.12)}
+    .category-tabs{display:flex;flex-wrap:wrap;gap:12px;border-bottom:1px solid rgba(0,0,0,.12);padding-bottom:14px;margin-bottom:18px}
+    .tab-btn{background:rgba(0,0,0,.06);color:#111;padding:12px 16px;border-radius:12px;font-weight:800;border:1px solid rgba(0,0,0,.1)}
     .tab-btn.active{background:var(--primary-color);color:#fff;border-color:transparent}
-    .templates-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;max-height:45vh;overflow-y:auto;padding-right:10px;font-family:'NumericAndLatinFont','Microsoft JhengHei','ZCOOL KuaiLe','Noto Sans TC',sans-serif}
-    .template-item{background:#fff;border:1px solid rgba(0,0,0,.1);color:#111;text-align:left;padding:14px;border-radius:10px;font-size:1.1em}
+    .templates-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;max-height:50vh;overflow-y:auto;padding-right:12px;font-family:'NumericAndLatinFont','Microsoft JhengHei','ZCOOL KuaiLe','Noto Sans TC',sans-serif}
+    .template-item{background:#fff;border:1px solid rgba(0,0,0,.1);color:#111;text-align:left;padding:16px;border-radius:12px;font-size:1.2em}
     .template-item:hover{background:var(--primary-color);color:#fff}
 
-    @media (max-width: 520px){
-      .main-title{font-size:2.2em}
-      #date-selector{font-size:1.6em}
-      .card{min-height:560px}
+    @media (max-width: 560px){
+      .main-title{font-size:2.4em}
+      #date-selector{font-size:1.8em}
+      .card{min-height:620px}
     }
   </style>
 </head>
@@ -172,10 +196,9 @@
 
       <div class="font-slider-container">
         <label for="font-size-slider">字級</label>
-        <input type="range" id="font-size-slider" min="1" max="2.6" step="0.1" value="1.5" aria-label="字級大小">
+        <input type="range" id="font-size-slider" min="1.2" max="3.2" step="0.1" value="1.9" aria-label="字級大小"> <!-- 預設 1.9 -->
       </div>
 
-      <!-- 局部字色工具：可選常用色＋自由取色 -->
       <div class="color-tools">
         <select id="color-picker" aria-label="預設字色">
           <option value="">字色（選擇後套用到選取文字）</option>
@@ -200,7 +223,6 @@
     </div>
   </div>
 
-  <!-- 範本 Modal -->
   <div id="template-modal">
     <div class="template-card">
       <h2 style="margin-top:0;margin-bottom:12px;">選擇作業範本</h2>
@@ -217,7 +239,6 @@
       const $  = s => document.querySelector(s);
       const $$ = s => Array.from(document.querySelectorAll(s));
 
-      // DOM
       const dateSelector = $('#date-selector');
       const weekDisplay = $('#week-display');
       const homeworkList = $('#homework-list');
@@ -235,7 +256,6 @@
       const colorPicker = $('#color-picker');
       const colorCustom = $('#color-custom');
 
-      // 狀態
       const today = new Date();
       const pad = n => String(n).padStart(2,'0');
       let currentDate = `${today.getFullYear()}-${pad(today.getMonth()+1)}-${pad(today.getDate())}`;
@@ -243,7 +263,6 @@
       let isVerticalMode = false;
       let allData = JSON.parse(localStorage.getItem('ultraContactBook_v20_final') || '{}');
 
-      // 範本
       const templates = {
         "國語文":["國習 L__","國語習作 p.__-`__`","甲本 p.__-`__`","生字本 L__","語詞本 L__","國練 第__回","圈詞 L__ 寫__遍","背書 L__","默書 L__","日記","閱讀心得"],
         "數學":["數習 p.__-`__`","數練 第__回","數作 p.__-`__`","計算練習本 p.__","數卷訂簽","應用題 x__"],
@@ -252,14 +271,11 @@
         "通用":["考卷訂簽","複習 L__-`__`","預習 L__","發回條","帶__","做家事","運動30分鐘","親子共讀"]
       };
 
-      // 日期 & 儲存
       const saveData = () => {
         allData[currentDate] = getCurrentItems();
         localStorage.setItem('ultraContactBook_v20_final', JSON.stringify(allData));
       };
-      const loadDataForDate = (date) => {
-        renderHomeworkList(allData[date] || []);
-      };
+      const loadDataForDate = (date) => { renderHomeworkList(allData[date] || []); };
       const updateDate = (dateString) => {
         const d = new Date(dateString + 'T00:00:00');
         const week = ['星期日','星期一','星期二','星期三','星期四','星期五','星期六'][d.getDay()];
@@ -271,11 +287,10 @@
       const getPrevDate = (dateStr) => { const [y,m,dd]=dateStr.split('-').map(Number); const d=new Date(y,m-1,dd); d.setDate(d.getDate()-1); return fmt(d); };
       const getNextDate = (dateStr) => { const [y,m,dd]=dateStr.split('-').map(Number); const d=new Date(y,m-1,dd); d.setDate(d.getDate()+1); return fmt(d); };
 
-      // 直書處理：保留換行
       const processTextForVertical = (text) => {
         const regex = /([a-zA-Z0-9\s._'`-]+)/g;
         return text
-          .split('\n') // 先切行
+          .split('\n')
           .map(line =>
             line.split(regex).map(seg =>
               (regex.test(seg) && seg.trim()!=='')
@@ -285,15 +300,13 @@
           ).join('<br>');
       };
 
-      // 取目前項目（純文字）
       const getCurrentItems = () =>
         $$('.item-content').map(el => el.textContent.replace(/\u00A0/g,' ').trim()).filter(Boolean);
 
-      // 渲染
       const renderHomeworkList = (items) => {
         homeworkList.innerHTML = '';
         if (!items || items.length === 0) {
-          homeworkList.innerHTML = `<p style="font-family:'Microsoft JhengHei','Noto Sans TC',sans-serif;font-size:1rem;text-align:center;margin:auto;color:#666;">點擊下方輸入框新增今日聯絡事項</p>`;
+          homeworkList.innerHTML = `<p style="font-family:'Microsoft JhengHei','Noto Sans TC',sans-serif;font-size:1.1rem;text-align:center;margin:auto;color:#666;">點擊下方輸入框新增今日聯絡事項</p>`;
           return;
         }
         items.forEach((text, idx) => {
@@ -311,7 +324,6 @@
         });
       };
 
-      // 新增一筆
       const addHomework = (text) => {
         const t = (text||'').trim();
         if (!t) return;
@@ -323,7 +335,6 @@
         newHomeworkInput.focus();
       };
 
-      // 模式切換
       const togglePresentation = () => {
         isPresentationMode = !isPresentationMode;
         document.body.classList.toggle('presentation-mode', isPresentationMode);
@@ -341,7 +352,6 @@
       const applyAndSaveFontSize = (size) => { document.documentElement.style.setProperty('--item-font-size', `${size}em`); localStorage.setItem('fontSizePreference_v20', size); };
       const loadPreferences = () => { const s = localStorage.getItem('fontSizePreference_v20'); if (s) { fontSizeSlider.value = s; applyAndSaveFontSize(s); } };
 
-      // 範本 Modal
       const initTemplateModal = () => {
         const modal = $('#template-modal');
         const showTemplateBtn = $('#show-template-btn');
@@ -379,7 +389,6 @@
         document.addEventListener('keydown', e => { if (e.key === 'Escape') hide(); });
       };
 
-      // 清單事件：刪除 / 編輯儲存 / 貼上純文字 / 拖曳排序
       homeworkList.addEventListener('click', e => {
         if (e.target.classList.contains('delete-item-btn')) {
           const item = e.target.closest('.homework-item');
@@ -390,7 +399,6 @@
           saveData();
         }
       });
-      // 允許 Enter 換行 → 不攔截 Enter
       homeworkList.addEventListener('focusout', e => { if (e.target.classList.contains('item-content')) saveData(); });
       homeworkList.addEventListener('paste', e => {
         if (e.target.classList.contains('item-content')) {
@@ -434,14 +442,12 @@
         saveData();
       });
 
-      // 初始化
       updateDate(currentDate);
       loadDataForDate(currentDate);
       loadPreferences();
       initTemplateModal();
       requestAnimationFrame(() => ensureDate());
 
-      // 新增與日期切換
       addItemBtn.addEventListener('click', () => addHomework(newHomeworkInput.value));
       newHomeworkInput.addEventListener('keydown', e => {
         if (e.key==='Enter' && !e.isComposing) { e.preventDefault(); document.execCommand('insertLineBreak'); }
@@ -462,7 +468,7 @@
         loadDataForDate(currentDate);
       });
 
-      // 複製文字（純文字）
+      // 文字複製
       copyTextBtn.addEventListener('click', async () => {
         ensureDate();
         const d = new Date(dateSelector.value + 'T00:00:00');
@@ -473,7 +479,7 @@
         try{ await navigator.clipboard.writeText(text); alert('已複製到剪貼簿'); } catch{ prompt('複製失敗，請手動複製：', text); }
       });
 
-      // 複製前日（找最近有資料的日子）
+      // 複製前日
       const findPreviousDateWithData = (dateStr, limit=60) => {
         let d=dateStr;
         for(let i=0;i<limit;i++){
@@ -502,10 +508,9 @@
       toggleVerticalBtn.addEventListener('click', toggleVertical);
       fontSizeSlider.addEventListener('input', e => applyAndSaveFontSize(e.target.value));
 
-      // 局部字色：預設色清單
+      // 局部字色
       const applyColorToSelection = (color) => {
         if (!color) return;
-        // 讓 execCommand 作用在 contenteditable 範圍
         document.execCommand('styleWithCSS', false, true);
         document.execCommand('foreColor', false, color);
       };
@@ -517,7 +522,7 @@
         applyColorToSelection(colorCustom.value);
       });
 
-      // 匯出 PNG（卡片）：輸出時強制白底＋文字純黑，並隱藏輸入列
+      // 匯出 PNG（卡片）
       exportPngBtn.addEventListener('click', async () => {
         ensureDate();
         if (typeof html2canvas !== 'function') return alert('匯出模組未載入，請檢查網路');
@@ -525,45 +530,35 @@
         const ts = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
         const old = exportPngBtn.textContent; exportPngBtn.disabled = true; exportPngBtn.textContent = '匯出中…';
 
-        const bar = $('#homework-input-area');
-        const prevDisplay = bar?.style.display;
-        if (bar) bar.style.display = 'none';
+        const bar = $('#homework-input-area'); const prevDisplay = bar?.style.display; if (bar) bar.style.display = 'none';
 
         try{
           const node = $('#main-card');
           const canvas = await html2canvas(node,{
             scale: Math.min(window.devicePixelRatio||1,3),
             useCORS: true,
-            backgroundColor: '#ffffff', // 輸出白底
+            backgroundColor: '#ffffff',
             logging: false,
             onclone:(doc)=>{
-              // 全域白底
               doc.body.style.background = '#ffffff';
-              // 卡片白底
               const card=doc.querySelector('#main-card');
               if(card){
                 card.style.background = '#ffffff';
-                card.style.boxShadow = '0 10px 30px rgba(0,0,0,.08)';
+                card.style.boxShadow = '0 14px 40px rgba(0,0,0,.08)';
                 const list=card.querySelector('#homework-list');
                 if(list) list.style.overflow='visible';
               }
-              // 強制所有文字純黑
               doc.querySelectorAll('.item-content, .item-index, #week-display, #date-selector, .main-title')
-                 .forEach(el => el.style.color = '#000000');
-              // 隱藏輸入列
-              const barClone = doc.querySelector('#homework-input-area');
-              if (barClone) barClone.remove();
+                 .forEach(el => el.style.color = '#000000');  // 文字純黑
+              const barClone = doc.querySelector('#homework-input-area'); if (barClone) barClone.remove();
             }
           });
           const a=document.createElement('a'); a.download=`聯絡簿_${ts}.png`; a.href=canvas.toDataURL('image/png'); document.body.appendChild(a); a.click(); a.remove();
         }catch(e){ alert('匯出圖片失敗：'+(e?.message||e)); }
-        finally{
-          if (bar) bar.style.display = prevDisplay ?? '';
-          exportPngBtn.disabled=false; exportPngBtn.textContent=old;
-        }
+        finally{ if (bar) bar.style.display = prevDisplay ?? ''; exportPngBtn.disabled=false; exportPngBtn.textContent=old; }
       });
 
-      // 匯出 PNG（整頁）：同上處理
+      // 匯出 PNG（整頁）
       exportFullPngBtn.addEventListener('click', async () => {
         ensureDate();
         if (typeof html2canvas !== 'function') return alert('匯出模組未載入，請檢查網路');
@@ -571,9 +566,7 @@
         const ts = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
         const old = exportFullPngBtn.textContent; exportFullPngBtn.disabled = true; exportFullPngBtn.textContent = '匯出中…';
 
-        const bar = $('#homework-input-area');
-        const prevDisplay = bar?.style.display;
-        if (bar) bar.style.display = 'none';
+        const bar = $('#homework-input-area'); const prevDisplay = bar?.style.display; if (bar) bar.style.display = 'none';
 
         try{
           const node = $('.container');
@@ -587,27 +580,21 @@
               const card=doc.querySelector('#main-card');
               if(card){
                 card.style.background = '#ffffff';
-                card.style.boxShadow = '0 10px 30px rgba(0,0,0,.08)';
+                card.style.boxShadow = '0 14px 40px rgba(0,0,0,.08)';
                 const list=card.querySelector('#homework-list');
                 if(list) list.style.overflow='visible';
               }
               doc.querySelectorAll('.item-content, .item-index, #week-display, #date-selector, .main-title')
                  .forEach(el => el.style.color = '#000000');
-              const barClone = doc.querySelector('#homework-input-area');
-              if (barClone) barClone.remove();
-              const modal=doc.getElementById('template-modal');
-              if(modal) modal.classList.remove('visible');
+              const barClone = doc.querySelector('#homework-input-area'); if (barClone) barClone.remove();
+              const modal=doc.getElementById('template-modal'); if(modal) modal.classList.remove('visible');
             }
           });
           const a=document.createElement('a'); a.download=`聯絡簿整頁_${ts}.png`; a.href=canvas.toDataURL('image/png'); document.body.appendChild(a); a.click(); a.remove();
         }catch(e){ alert('匯出整頁圖片失敗：'+(e?.message||e)); }
-        finally{
-          if (bar) bar.style.display = prevDisplay ?? '';
-          exportFullPngBtn.disabled=false; exportFullPngBtn.textContent=old;
-        }
+        finally{ if (bar) bar.style.display = prevDisplay ?? ''; exportFullPngBtn.disabled=false; exportFullPngBtn.textContent=old; }
       });
 
-      // 其他控制
       $('#clear-today-btn').addEventListener('click', () => {
         ensureDate();
         if (!confirm(`確定要清空 ${dateSelector.value} 的事項嗎？`)) return;
