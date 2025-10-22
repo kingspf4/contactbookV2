@@ -1,446 +1,143 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>智慧聯絡簿 v20.9（返回編輯＋週次可填寫）</title>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-  <style>
-    :root{
-      --primary-color:#2b7de9;
-      --page-bg:#ffffff;
-      --card-bg:#ffffff;
-      --text-color-primary:#000000;
-      --card-border:rgba(0,0,0,.12);
-      --shadow-color:rgba(0,0,0,.08);
-      --item-font-size:1.9em;
-      --control-border-radius:14px;
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%;margin:0}
-    body{
-      font-family:'Microsoft JhengHei','Noto Sans TC',sans-serif;
-      color:var(--text-color-primary);
-      background:var(--page-bg);
-      padding:30px;
-      display:flex;align-items:center;justify-content:center;
-    }
-    .container{max-width:1320px;width:100%}
-    .main-header{text-align:center;margin-bottom:20px}
-    .main-title{
-      font-family:'ZCOOL KuaiLe','Microsoft JhengHei','Noto Sans TC',sans-serif;
-      font-size:3em;font-weight:900;
-    }
-    .card{
-      background:var(--card-bg);
-      border-radius:24px;
-      border:1px solid var(--card-border);
-      box-shadow:0 10px 30px var(--shadow-color);
-      padding:28px;
-      display:flex;
-      flex-direction:column;
-      min-height:680px;
-      max-height:80vh;
-    }
-
-    /* 日期 + 週次列 */
-    .card-header{
-      display:flex;flex-wrap:wrap;gap:12px;
-      justify-content:center;align-items:center;
-      margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--card-border)
-    }
-    .nav-date-group{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-    .nav-date-group button{padding:10px 16px;font-size:1.05em}
-    #date-selector{background:none;border:none;font-size:2.2em;font-weight:800;cursor:pointer}
-    #week-display{font-size:1.1em;color:#555}
-    .weekno-wrap{display:flex;align-items:center;gap:8px;margin-left:8px}
-    .weekno-wrap label{font-weight:700;color:#333}
-    #weekno-input{
-      width:120px;padding:8px 10px;border-radius:10px;
-      border:1px solid rgba(0,0,0,.15); font-size:1em;
-    }
-    #weekno-input:focus{outline:none;border-color:var(--primary-color);box-shadow:0 0 0 3px rgba(43,125,233,.15)}
-
-    /* 清單 */
-    .homework-list{
-      list-style:none;padding:0;margin:0;
-      display:flex;flex-direction:column;
-      gap:6px; /* 間距小一些 */
-      flex-grow:1;overflow:auto;padding:8px;margin:0 -8px;
-    }
-    .homework-item{
-      display:flex;align-items:flex-start;gap:8px;
-      font-size:var(--item-font-size);
-      border-radius:var(--control-border-radius);
-      padding:10px 12px;
-      transition:background-color .2s ease;
-      border:1px dashed transparent;
-    }
-    .homework-item:hover{background-color:rgba(0,0,0,.03)}
-    .item-index{color:#555;font-weight:700;margin-top:2px}
-    .item-content{flex:1;white-space:pre-wrap;outline:none}
-    .delete-item-btn{opacity:0;background:none;border:none;font-size:1.2em;cursor:pointer;color:#777}
-    .homework-item:hover .delete-item-btn{opacity:1}
-
-    /* 新增輸入列 */
-    #homework-input-area{
-      display:flex;gap:8px;background:rgba(0,0,0,.05);
-      border-radius:var(--control-border-radius);
-      padding:10px;border:1px solid rgba(0,0,0,.08);
-      margin-top:14px;
-    }
-    #new-homework-input{
-      flex:1;padding:10px 12px;font-size:1.2em;
-      border-radius:10px;border:1px solid rgba(0,0,0,.15);
-    }
-    #new-homework-input:focus{outline:none;border-color:var(--primary-color);box-shadow:0 0 0 3px rgba(43,125,233,.2)}
-    .add-btn{background:var(--primary-color);color:#fff;border:none;border-radius:10px;padding:10px 14px;cursor:pointer}
-
-    /* 按鈕列 */
-    .footer-buttons{
-      display:grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap:10px;margin-top:16px;
-    }
-    button{border:none;border-radius:12px;padding:10px 14px;font-weight:700;cursor:pointer}
-    .btn-primary{background:var(--primary-color);color:#fff}
-    .btn-secondary{background:rgba(0,0,0,.05);border:1px solid rgba(0,0,0,.12)}
-    .font-slider-container{display:flex;align-items:center;gap:10px;background:rgba(0,0,0,.05);padding:8px 10px;border-radius:10px}
-    .color-tools{display:flex;gap:10px;justify-content:center;align-items:center}
-    .color-tools select,.color-tools input[type=color]{padding:8px 10px;border-radius:10px;border:1px solid rgba(0,0,0,.12)}
-
-    /* 直書模式 */
-    .vertical-mode{flex-direction:row-reverse;align-items:flex-start;overflow-x:auto;overflow-y:hidden;gap:16px}
-    .vertical-mode .homework-item{flex-direction:column;min-width:110px;min-height:420px;align-items:stretch;padding:14px}
-    .vertical-mode .item-content{writing-mode:vertical-rl;text-align:right}
-    .vertical-mode .horizontal-in-vertical{writing-mode:horizontal-tb;display:inline-block}
-
-    /* 展示模式：隱藏部分控制、放大字級 */
-    .presentation-mode #homework-input-area,
-    .presentation-mode .footer-buttons{display:none}
-    .presentation-mode .homework-item{background:transparent}
-    .presentation-mode .card{max-height:none;min-height:auto}
-    .presentation-mode :root{--item-font-size:2.2em}
-
-    /* 範本視窗 */
-    #template-modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.3);align-items:center;justify-content:center;z-index:10}
-    #template-modal.visible{display:flex}
-    .template-card{background:#fff;padding:24px;border-radius:14px;width:90%;max-width:800px}
-    .category-tabs{display:flex;gap:8px;margin-bottom:10px}
-    .tab-btn{padding:8px 12px;border-radius:8px;border:1px solid rgba(0,0,0,.12);cursor:pointer}
-    .tab-btn.active{background:var(--primary-color);color:#fff}
-    .templates-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;max-height:50vh;overflow:auto}
-    .template-item{padding:10px;border:1px solid rgba(0,0,0,.1);border-radius:10px;cursor:pointer}
-    .template-item:hover{background:var(--primary-color);color:#fff}
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>智慧聯絡簿 v21.0</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<style>
+:root{
+  --primary:#2b7de9;
+  --bg:#fff;
+  --text:#000;
+  --font-size:2em;
+}
+*{box-sizing:border-box;font-family:'Microsoft JhengHei','Noto Sans TC',sans-serif;}
+body{
+  margin:0;background:var(--bg);color:var(--text);
+  display:flex;justify-content:center;align-items:center;
+  padding:30px;
+}
+.container{max-width:1280px;width:100%}
+.card{border:1px solid #ccc;border-radius:20px;padding:30px;box-shadow:0 10px 30px rgba(0,0,0,.1);}
+.card-header{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:center;margin-bottom:20px;}
+#date-selector{font-size:2em;border:none;background:none;}
+#weekno-input{padding:6px 10px;border:1px solid #ccc;border-radius:8px;}
+.homework-list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:6px;}
+.homework-item{display:flex;gap:10px;padding:8px;border-radius:10px;}
+.item-content{flex:1;outline:none;white-space:pre-wrap;font-size:var(--font-size);}
+.footer-buttons{display:flex;flex-wrap:wrap;gap:10px;margin-top:15px;}
+button{padding:10px 14px;border:none;border-radius:10px;cursor:pointer;font-weight:700;}
+.btn-primary{background:var(--primary);color:#fff;}
+.btn-secondary{background:#eee;}
+.presentation-mode #homework-input-area{display:none;}
+</style>
 </head>
 <body>
-  <div class="container">
-    <div class="main-header"><h1 class="main-title">智慧聯絡簿</h1></div>
-
-    <div class="card" id="main-card">
-      <div class="card-header">
-        <div class="nav-date-group">
-          <button id="prev-day-btn" class="btn-secondary">◀ 上一日</button>
-          <input type="date" id="date-selector" aria-label="選擇日期">
-          <button id="next-day-btn" class="btn-secondary">下一日 ▶</button>
-          <div id="week-display" aria-live="polite"></div>
-          <div class="weekno-wrap">
-            <label for="weekno-input">週次</label>
-            <input type="text" id="weekno-input" placeholder="例如：第 8 週" inputmode="text">
-          </div>
-        </div>
-      </div>
-
-      <ul class="homework-list" id="homework-list" aria-label="聯絡事項清單"></ul>
-
-      <div id="homework-input-area">
-        <input type="text" id="new-homework-input" placeholder="新增事項..." aria-label="新增事項">
-        <button id="add-item-btn" class="add-btn" aria-label="加入事項">➕</button>
-        <button id="show-template-btn" class="btn-secondary" title="從範本加入" aria-label="從範本加入">🪄 範本</button>
-      </div>
+<div class="container">
+  <h1 style="text-align:center;font-size:2.5em;">智慧聯絡簿</h1>
+  <div class="card" id="main-card">
+    <div class="card-header">
+      <button id="prev-day" class="btn-secondary">◀</button>
+      <input type="date" id="date-selector">
+      <button id="next-day" class="btn-secondary">▶</button>
+      <span id="week-display"></span>
+      <label>週次 <input type="text" id="weekno-input" placeholder="第 8 週"></label>
     </div>
-
-    <div class="footer-buttons">
-      <button id="toggle-vertical-btn" class="btn-secondary" aria-pressed="false">切換直書</button>
-      <div class="font-slider-container">
-        <label for="font-size-slider">字級</label>
-        <input type="range" id="font-size-slider" min="1.2" max="3.0" step="0.1" value="1.9" aria-label="字級大小">
-      </div>
-      <div class="color-tools">
-        <select id="color-picker" aria-label="快速字色">
-          <option value="">字色</option>
-          <option value="#000000">黑色</option>
-          <option value="#d92c2c">紅色</option>
-          <option value="#1a73e8">藍色</option>
-          <option value="#188038">綠色</option>
-          <option value="#e37400">橙色</option>
-          <option value="#6f42c1">紫色</option>
-        </select>
-        <input type="color" id="color-custom" value="#000000" aria-label="自訂字色">
-      </div>
-      <button id="copy-text-btn" class="btn-secondary">複製文字</button>
-      <button id="copy-prev-btn" class="btn-secondary">複製前日</button>
-      <button id="export-png-btn" class="btn-primary">匯出圖片（卡片）</button>
-      <button id="export-fullpng-btn" class="btn-secondary">匯出圖片（整頁）</button>
-      <button id="toggle-presentation-btn" class="btn-secondary">全螢幕展示</button>
+    <ul id="homework-list" class="homework-list"></ul>
+    <div id="homework-input-area" style="display:flex;gap:8px;margin-top:10px;">
+      <input type="text" id="new-homework-input" placeholder="新增事項..." style="flex:1;padding:8px;font-size:1.1em;">
+      <button id="add-item" class="btn-primary">➕</button>
     </div>
   </div>
 
-  <div id="template-modal">
-    <div class="template-card">
-      <h2>選擇作業範本</h2>
-      <div id="category-tabs" class="category-tabs"></div>
-      <div id="templates-grid" class="templates-grid"></div>
-    </div>
+  <div class="footer-buttons">
+    <label>字級 <input type="range" id="font-slider" min="1" max="3" step="0.1" value="2"></label>
+    <button id="copy-prev" class="btn-secondary">複製前日</button>
+    <button id="copy-text" class="btn-secondary">複製文字</button>
+    <button id="export-png" class="btn-primary">匯出圖片</button>
+    <button id="toggle-full" class="btn-secondary">全螢幕展示</button>
   </div>
+</div>
 
-  <script>
-    document.addEventListener('DOMContentLoaded',()=>{
-      const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
-      const today=new Date(),pad=n=>String(n).padStart(2,'0');
-      let currentDate=`${today.getFullYear()}-${pad(today.getMonth()+1)}-${pad(today.getDate())}`;
-      // 兼容：可能是 {items,weekno} 或 Array
-      let allData = {};
-      try{ allData = JSON.parse(localStorage.getItem('ultraContactBook_v20_final')||'{}') || {}; }catch(e){ allData = {}; }
+<script>
+document.addEventListener("DOMContentLoaded",()=>{
+  const $=s=>document.querySelector(s),$$=s=>Array.from(document.querySelectorAll(s));
+  const dateInput=$("#date-selector"),weekDisp=$("#week-display"),list=$("#homework-list");
+  const addBtn=$("#add-item"),textInput=$("#new-homework-input"),weekno=$("#weekno-input");
+  const fontSlider=$("#font-slider"),toggleFull=$("#toggle-full");
+  const prevBtn=$("#prev-day"),nextBtn=$("#next-day");
+  const copyPrev=$("#copy-prev"),copyText=$("#copy-text"),exportBtn=$("#export-png");
+  let allData=JSON.parse(localStorage.getItem("contactbook_v21")||"{}"),isFull=false;
 
-      let isVertical=false;
-      let isPresentation=false;
-
-      const dateSelector=$('#date-selector');
-      const weekDisplay=$('#week-display');
-      const weeknoInput=$('#weekno-input');
-      const list=$('#homework-list');
-      const input=$('#new-homework-input');
-      const prevBtn=$('#prev-day-btn');
-      const nextBtn=$('#next-day-btn');
-      const presentationBtn=$('#toggle-presentation-btn');
-
-      const templates={
-        "國語文":["國習 L__","國語習作 p.__-__","甲本 p.__-__","生字本 L__","語詞本 L__","默書 L__","日記"],
-        "數學":["數習 p.__-__","數練 第__回","應用題 x__"],
-        "英語":["英習 U__","英聽","單字 U__ 寫__遍","課文朗讀 U__"],
-        "通用":["考卷訂簽","預習 L__","帶__","親子共讀","運動30分鐘"]
-      };
-
-      /* --------- 資料模型工具 --------- */
-      const ensureObjForDate = (d)=>{
-        const v = allData[d];
-        if (Array.isArray(v)) { // 舊格式
-          allData[d] = { items: v.slice(), weekno: "" };
-        } else if (!v || typeof v!=='object') {
-          allData[d] = { items: [], weekno: "" };
-        } else {
-          if (!Array.isArray(v.items)) v.items = [];
-          if (typeof v.weekno !== 'string') v.weekno = '';
-        }
-        return allData[d];
-      };
-      const getRecord = (d)=>ensureObjForDate(d);
-      const getItems = ()=>$$('.item-content').map(e=>e.textContent.trim()).filter(Boolean);
-      const getWeekno = ()=>weeknoInput.value.trim();
-
-      const save = ()=>{
-        const rec = ensureObjForDate(currentDate);
-        rec.items = getItems();
-        rec.weekno = getWeekno();
-        localStorage.setItem('ultraContactBook_v20_final', JSON.stringify(allData));
-      };
-
-      /* --------- 日期工具 --------- */
-      const fmt=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
-      const prevDate=s=>{let[y,m,dd]=s.split('-').map(Number);let d=new Date(y,m-1,dd);d.setDate(d.getDate()-1);return fmt(d);};
-      const nextDate=s=>{let[y,m,dd]=s.split('-').map(Number);let d=new Date(y,m-1,dd);d.setDate(d.getDate()+1);return fmt(d);};
-      const updateDate=s=>{let d=new Date(s+'T00:00');let w=['日','一','二','三','四','五','六'][d.getDay()];weekDisplay.textContent=`星期${w}`;dateSelector.value=s;};
-
-      /* --------- Render --------- */
-      const renderList=(arr)=>{
-        list.innerHTML='';
-        if(!arr||arr.length===0){list.innerHTML=`<p style="text-align:center;color:#666;">點擊下方輸入框新增今日事項</p>`;return;}
-        arr.forEach((t,i)=>{
-          const li=document.createElement('li');
-          li.className='homework-item';
-          li.innerHTML=`<span class="item-index">${i+1}.</span><span class="item-content" contenteditable="true">${t}</span><button class="delete-item-btn" title="刪除">×</button>`;
-          list.appendChild(li);
-        });
-      };
-      const loadDate=(d)=>{
-        const rec = getRecord(d);
-        renderList(rec.items);
-        weeknoInput.value = rec.weekno || '';
-      };
-
-      /* --------- 初始化 --------- */
-      updateDate(currentDate);
-      loadDate(currentDate);
-
-      /* --------- 新增項目 --------- */
-      const add=(t)=>{
-        if(!t.trim())return;
-        const arr=getItems();arr.push(t.trim());
-        renderList(arr); save(); input.value='';
-      };
-      $('#add-item-btn').onclick=()=>add(input.value);
-      input.addEventListener('keydown',e=>{
-        if(e.key==='Enter' && !e.isComposing){
-          // 支援在項目內 Enter 換行：此處是新增輸入框，仍採新增一筆
-          e.preventDefault(); add(input.value);
-        }
-      });
-
-      /* --------- 項目內 Enter 允許換行 --------- */
-      list.addEventListener('keydown',e=>{
-        if(e.target.classList.contains('item-content')){
-          if(e.key==='Enter' && !e.shiftKey){ // Enter = 換行（不送出）
-            e.preventDefault();
-            document.execCommand('insertLineBreak');
-          }
-        }
-      });
-
-      /* --------- 刪除/編輯儲存 --------- */
-      list.onclick=e=>{
-        if(e.target.classList.contains('delete-item-btn')){
-          const idx=$$('.delete-item-btn').indexOf(e.target);
-          const arr=getItems();arr.splice(idx,1);
-          renderList(arr); save();
-        }
-      };
-      list.addEventListener('focusout',e=>{ if(e.target.classList.contains('item-content')) save(); });
-
-      /* --------- 日期切換（按鈕與選擇器） --------- */
-      dateSelector.onchange=e=>{ save(); currentDate=e.target.value; updateDate(currentDate); loadDate(currentDate); };
-      prevBtn.onclick=()=>{ save(); currentDate=prevDate(currentDate); updateDate(currentDate); loadDate(currentDate); };
-      nextBtn.onclick=()=>{ save(); currentDate=nextDate(currentDate); updateDate(currentDate); loadDate(currentDate); };
-
-      /* --------- 週次更新 --------- */
-      weeknoInput.addEventListener('input', ()=>save());
-
-      /* --------- 字級與直書 --------- */
-      $('#font-size-slider').oninput=e=>document.documentElement.style.setProperty('--item-font-size',`${e.target.value}em`);
-      $('#toggle-vertical-btn').onclick=()=>{
-        isVertical=!isVertical;
-        list.classList.toggle('vertical-mode',isVertical);
-        $('#toggle-vertical-btn').setAttribute('aria-pressed', String(isVertical));
-        $('#toggle-vertical-btn').textContent = isVertical ? '切換橫書' : '切換直書';
-      };
-
-      /* --------- 局部字色 --------- */
-      const applyColor=c=>{if(!c)return;document.execCommand('styleWithCSS',false,true);document.execCommand('foreColor',false,c); save();};
-      $('#color-picker').onchange=()=>{applyColor($('#color-picker').value);$('#color-picker').value='';};
-      $('#color-custom').oninput=()=>applyColor($('#color-custom').value);
-
-      /* --------- 複製文字（含週次） --------- */
-      $('#copy-text-btn').onclick=async()=>{
-        const d=new Date(dateSelector.value+'T00:00');
-        const w=['日','一','二','三','四','五','六'][d.getDay()];
-        const wk = getWeekno();
-        const header = `${dateSelector.value.replace(/-/g,'/')}（星期${w}${wk?`，${wk}`:''}）`;
-        const text = header + '\n' + getItems().map((t,i)=>`${i+1}. ${t}`).join('\n');
-        try{ await navigator.clipboard.writeText(text); alert('已複製文字'); } catch{ prompt('複製失敗，請手動複製：', text); }
-      };
-
-      /* --------- 複製前日 --------- */
-      const findPrevDateWithData = (d,limit=60)=>{
-        let cur=d; for(let i=0;i<limit;i++){ cur=prevDate(cur); const rec=allData[cur]; const items = Array.isArray(rec)?rec:(rec?.items||[]);
-          if(items.length) return cur;
-        }
-        return null;
-      };
-      $('#copy-prev-btn').onclick=()=>{
-        const p=findPrevDateWithData(currentDate,60);
-        if(!p){ alert('找不到前日的聯絡事項（最近 60 天都沒有資料）。'); return; }
-        const prevRec = getRecord(p);
-        const prevItems = prevRec.items.slice();
-        if(prevItems.length===0){ alert(`${p} 沒有項目可複製。`); return; }
-        const replace = confirm(`找到 ${p} 的 ${prevItems.length} 項。\n\n按「確定」→ 覆蓋今天\n按「取消」→ 追加到今天後面`);
-        const result = replace ? prevItems : [...getItems(), ...prevItems];
-        renderList(result); save();
-        alert(replace ? '已覆蓋今日項目。' : '已把前日項目追加到今天。');
-      };
-
-      /* --------- 匯出圖片（卡片 / 整頁，字色強制黑 + 帶週次） --------- */
-      const exportImage=async(node,name)=>{
-        const bar=$('#homework-input-area'); const prev=bar.style.display; bar.style.display='none';
-        try{
-          const canvas=await html2canvas(node,{scale:2,useCORS:true,backgroundColor:'#fff',logging:false,onclone:doc=>{
-            // 強制可讀黑字
-            doc.querySelectorAll('.item-content,.item-index,#week-display,#date-selector,.main-title,label,#weekno-input').forEach(el=>{
-              el.style.color='#000'; if(el.id==='weekno-input'){ el.style.background='#fff'; el.style.border='1px solid #0002'; }
-            });
-            // 移除輸入列
-            doc.querySelector('#homework-input-area')?.remove();
-          }});
-          const a=document.createElement('a'); a.download=`${name}.png`; a.href=canvas.toDataURL('image/png'); document.body.appendChild(a); a.click(); a.remove();
-        }catch(e){ alert('匯出圖片失敗：'+(e?.message||e)); }
-        finally{ bar.style.display=prev || ''; }
-      };
-      $('#export-png-btn').onclick=()=>exportImage($('#main-card'),`聯絡簿_${currentDate}`);
-      $('#export-fullpng-btn').onclick=()=>exportImage($('.container'),`聯絡簿整頁_${currentDate}`);
-
-      /* --------- 範本 Modal --------- */
-      const initTemplateModal = () => {
-        const modal = $('#template-modal');
-        const showTemplateBtn = $('#show-template-btn');
-        const categoryTabs = $('#category-tabs');
-        const templatesGrid = $('#templates-grid');
-        let inited = false;
-        const show = () => modal.classList.add('visible');
-        const hide = () => modal.classList.remove('visible');
-        const renderCat = (cat) => {
-          categoryTabs.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
-          categoryTabs.querySelector(`.tab-btn[data-category="${cat}"]`)?.classList.add('active');
-          templatesGrid.innerHTML='';
-          (templates[cat]||[]).forEach(t=>{
-            const btn=document.createElement('button');
-            btn.className='template-item'; btn.textContent=t;
-            btn.onclick=()=>{ add(t); hide(); };
-            templatesGrid.appendChild(btn);
-          });
-        };
-        showTemplateBtn.addEventListener('click', ()=>{
-          if(!inited){
-            Object.keys(templates).forEach(cat=>{
-              const tab=document.createElement('button');
-              tab.className='tab-btn'; tab.dataset.category=cat; tab.textContent=cat;
-              tab.onclick=()=>renderCat(cat);
-              categoryTabs.appendChild(tab);
-            });
-            renderCat(Object.keys(templates)[0]);
-            inited=true;
-          }
-          show();
-        });
-        modal.addEventListener('click', e=>{ if(e.target===modal) hide(); });
-        document.addEventListener('keydown', e=>{ if(e.key==='Escape') hide(); });
-      };
-      initTemplateModal();
-
-      /* --------- 展示模式切換（返回編輯） --------- */
-      const enterPresentation = async ()=>{
-        isPresentation=true;
-        document.body.classList.add('presentation-mode');
-        presentationBtn.textContent='返回編輯';
-        try{ await document.documentElement.requestFullscreen?.(); }catch(_){}
-      };
-      const exitPresentation = async ()=>{
-        isPresentation=false;
-        document.body.classList.remove('presentation-mode');
-        presentationBtn.textContent='全螢幕展示';
-        if (document.fullscreenElement) { try{ await document.exitFullscreen?.(); }catch(_){} }
-      };
-      presentationBtn.addEventListener('click', ()=>{
-        if (!isPresentation) enterPresentation(); else exitPresentation();
-      });
-      document.addEventListener('fullscreenchange', ()=>{
-        // 使用者按 ESC 離開全螢幕時，自動回到編輯狀態
-        if (!document.fullscreenElement && isPresentation) {
-          exitPresentation();
-        }
-      });
-    });
-  </script>
+  const pad=n=>String(n).padStart(2,"0");
+  const today=new Date();let curDate=`${today.getFullYear()}-${pad(today.getMonth()+1)}-${pad(today.getDate())}`;
+  const setWeek=()=>{const d=new Date(curDate);weekDisp.textContent="星期"+"日一二三四五六"[d.getDay()];};
+  const render=()=>{
+    const items=(allData[curDate]?.items)||[];
+    list.innerHTML=items.map((t,i)=>`<li class='homework-item'><span>${i+1}.</span><span contenteditable class='item-content'>${t}</span><button class='del btn-secondary'>刪</button></li>`).join("");
+    weekno.value=allData[curDate]?.week||"";
+    setWeek();
+  };
+  const save=()=>{
+    const items=$$(".item-content").map(e=>e.textContent.trim()).filter(Boolean);
+    allData[curDate]={items,week:weekno.value.trim()};
+    localStorage.setItem("contactbook_v21",JSON.stringify(allData));
+  };
+  addBtn.onclick=()=>{if(!textInput.value.trim())return;const rec=allData[curDate]||{items:[],week:""};rec.items.push(textInput.value.trim());allData[curDate]=rec;textInput.value="";save();render();};
+  list.onclick=e=>{
+    if(e.target.classList.contains("del")){
+      const i=$$(".del").indexOf(e.target);
+      allData[curDate].items.splice(i,1);save();render();
+    }
+  };
+  list.addEventListener("focusout",e=>{if(e.target.classList.contains("item-content"))save();});
+  weekno.oninput=()=>save();
+  dateInput.onchange=e=>{save();curDate=e.target.value;render();};
+  prevBtn.onclick=()=>{save();const d=new Date(curDate);d.setDate(d.getDate()-1);curDate=`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;dateInput.value=curDate;render();};
+  nextBtn.onclick=()=>{save();const d=new Date(curDate);d.setDate(d.getDate()+1);curDate=`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;dateInput.value=curDate;render();};
+  copyText.onclick=async()=>{
+    const d=new Date(curDate);const week="日一二三四五六"[d.getDay()];
+    const w=weekno.value?"，"+weekno.value:"";
+    const text=`${curDate}（星期${week}${w}）\n`+$$(".item-content").map((e,i)=>`${i+1}. ${e.textContent}`).join("\n");
+    await navigator.clipboard.writeText(text);alert("已複製文字");
+  };
+  copyPrev.onclick=()=>{
+    const keys=Object.keys(allData).sort();const idx=keys.indexOf(curDate);
+    if(idx<=0)return alert("沒有前日資料");
+    const prev=allData[keys[idx-1]];if(!prev)return;
+    const replace=confirm("覆蓋今天項目？取消則追加");
+    const now=allData[curDate]||{items:[],week:""};
+    now.items=replace?prev.items.slice():[...now.items,...prev.items];
+    allData[curDate]=now;save();render();
+  };
+  exportBtn.onclick=async()=>{
+    const bar=$("#homework-input-area");bar.style.display="none";
+    const canvas=await html2canvas($("#main-card"),{backgroundColor:"#fff",scale:2,onclone:doc=>{
+      doc.querySelectorAll(".item-content").forEach(e=>e.style.color="#000");
+      doc.querySelector("#homework-input-area")?.remove();
+    }});
+    const a=document.createElement("a");a.download=`聯絡簿_${curDate}.png`;a.href=canvas.toDataURL();a.click();
+    bar.style.display="flex";
+  };
+  fontSlider.oninput=e=>{
+    document.documentElement.style.setProperty("--font-size",e.target.value+"em");
+  };
+  toggleFull.onclick=async()=>{
+    if(!isFull){
+      document.body.classList.add("presentation-mode");
+      isFull=true;toggleFull.textContent="返回編輯";
+      await document.documentElement.requestFullscreen?.();
+    }else{
+      document.body.classList.remove("presentation-mode");
+      isFull=false;toggleFull.textContent="全螢幕展示";
+      if(document.fullscreenElement)await document.exitFullscreen?.();
+    }
+  };
+  document.addEventListener("fullscreenchange",()=>{if(!document.fullscreenElement&&isFull){isFull=false;toggleFull.textContent="全螢幕展示";}});
+  dateInput.value=curDate;render();
+});
+</script>
 </body>
 </html>
