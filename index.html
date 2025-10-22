@@ -3,169 +3,122 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>智慧聯絡簿 v20.7（放大版）</title>
+  <title>智慧聯絡簿 v20.8（加寬精簡版）</title>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <style>
-    /* v20.7 放大：更寬容器、更大字級、更高卡片、更大按鈕與間距 */
-    @font-face{
-      font-family:'NumericAndLatinFont';
-      src: local('Microsoft JhengHei'), local('Inter'), local('Arial');
-      unicode-range: U+0020-007F;
-    }
+    /* ====== 外觀設定 ====== */
     :root{
       --primary-color:#2b7de9;
       --page-bg:#ffffff;
       --card-bg:#ffffff;
-      --card-border:rgba(0,0,0,.12);
       --text-color-primary:#000000;
-      --text-color-secondary:rgba(0,0,0,.6);
-      --input-bg:rgba(0,0,0,.05);
+      --card-border:rgba(0,0,0,.12);
       --shadow-color:rgba(0,0,0,.08);
-      --control-border-radius:16px;        /* 角更圓 */
-      --delete-color:#d92c2c;
-      --item-font-size:1.9em;              /* 預設項目字更大（原 1.5） */
-      --danger:#ff5c5c;
-      --space:14px;                         /* 統一間距變大 */
+      --item-font-size:1.9em;
+      --control-border-radius:14px;
     }
     *{box-sizing:border-box}
     html,body{height:100%;margin:0}
     body{
       font-family:'Microsoft JhengHei','Noto Sans TC',sans-serif;
       color:var(--text-color-primary);
-      -webkit-font-smoothing:antialiased;
       background:var(--page-bg);
-      padding:28px 28px 110px;             /* 外距加大 */
-      display:flex;align-items:center;justify-content:center
+      padding:30px;
+      display:flex;align-items:center;justify-content:center;
     }
-    .container{max-width:1180px; width:100%} /* 更寬 */
-    .main-header{text-align:center;margin-bottom:22px}
+
+    /* ====== 結構與卡片 ====== */
+    .container{max-width:1320px;width:100%}
+    .main-header{text-align:center;margin-bottom:20px}
     .main-title{
       font-family:'ZCOOL KuaiLe','Microsoft JhengHei','Noto Sans TC',sans-serif;
-      font-size:3.2em;                     /* 標題更大 */
-      font-weight:900;color:#111;text-shadow:none;
-      letter-spacing:.5px;
+      font-size:3em;font-weight:900;
     }
 
     .card{
       background:var(--card-bg);
-      border-radius:28px;border:1px solid var(--card-border);
-      box-shadow:0 14px 40px 0 var(--shadow-color);
-      padding:30px;animation:fadeIn .6s cubic-bezier(.2,.8,.2,1);
-      display:flex;flex-direction:column;min-height:720px;max-height:82vh; /* 更高 */
+      border-radius:24px;
+      border:1px solid var(--card-border);
+      box-shadow:0 10px 30px var(--shadow-color);
+      padding:28px;
+      display:flex;
+      flex-direction:column;
+      min-height:680px;
+      max-height:80vh;
     }
-    @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
-    @keyframes itemFadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
 
-    .card-header{
-      display:flex;flex-wrap:wrap;gap:16px;justify-content:center;align-items:center;
-      margin-bottom:18px;padding-bottom:18px;border-bottom:1px solid var(--card-border);flex-shrink:0
-    }
-    #date-selector{
-      background:none;border:none;color:var(--text-color-primary);
-      font-size:2.4em;                      /* 日期更大 */
-      font-weight:800;text-align:center;cursor:pointer;padding:6px 8px;border-radius:12px
-    }
-    #date-selector::-webkit-calendar-picker-indicator{cursor:pointer;transform:scale(1.25)}
-    #week-display{font-size:1.2em;font-weight:600;color:var(--text-color-secondary);margin-top:2px}
-    .nav-date-group{display:flex;gap:12px}
-    .nav-date-group button{padding:12px 18px;font-size:1.05em}
+    /* ====== 日期區 ====== */
+    .card-header{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;align-items:center;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--card-border)}
+    #date-selector{background:none;border:none;font-size:2.4em;font-weight:800;cursor:pointer}
+    .nav-date-group{display:flex;gap:10px}
+    .nav-date-group button{padding:10px 16px;font-size:1.05em}
+    #week-display{font-size:1.1em;color:#555}
 
+    /* ====== 清單 ====== */
     .homework-list{
-      list-style:none;padding:0;margin:0;display:flex;flex-direction:column;
-      gap:14px;flex-grow:1;overflow:auto;padding:8px;margin:0 -8px
+      list-style:none;padding:0;margin:0;
+      display:flex;flex-direction:column;
+      gap:6px; /* 間距縮小 */
+      flex-grow:1;overflow:auto;padding:8px;margin:0 -8px;
     }
     .homework-item{
-      font-family:'NumericAndLatinFont','Microsoft JhengHei','ZCOOL KuaiLe','Noto Sans TC',sans-serif;
+      display:flex;align-items:flex-start;gap:8px;
       font-size:var(--item-font-size);
-      display:flex;align-items:flex-start;gap:12px;
-      padding:14px 16px;border-radius:var(--control-border-radius);
-      transition:background-color .2s ease, box-shadow .2s ease;
-      animation:itemFadeIn .2s ease forwards;position:relative;border:1px dashed transparent
-    }
-    .homework-item .grab{cursor:grab;user-select:none;opacity:.6;font-size:1.1em;line-height:1.2}
-    .homework-item.dragging{opacity:.65}
-    .homework-item.drag-over{background:rgba(0,0,0,.04);border-color:rgba(0,0,0,.2)}
-    .homework-item .item-content{
-      flex:1; outline:none; white-space:pre-wrap; min-height:1.4em; line-height:1.5;
-    }
-    .homework-item:hover,.homework-item:focus-within{background-color:rgba(0,0,0,.03)}
-    .item-index{font-family:'NumericAndLatinFont','Microsoft JhengHei','Inter',sans-serif;font-weight:700;color:var(--text-color-secondary);margin-top:2px}
-
-    #homework-input-area{
-      display:flex;gap:10px;background-color:var(--input-bg);
       border-radius:var(--control-border-radius);
-      border:1px solid rgba(0,0,0,.08);
-      transition:box-shadow .25s ease;flex-shrink:0;margin-top:18px;padding:12px
+      padding:10px 12px;
+      transition:background-color .2s ease;
+      border:1px dashed transparent;
     }
-    #homework-input-area:focus-within{box-shadow:0 0 0 5px rgba(43,125,233,.18)}
-    #new-homework-input{
-      flex:1;background:#fff;border:1px solid rgba(0,0,0,.12);border-radius:12px;
-      padding:12px 14px;font-size:1.2em;color:#111;
-      font-family:'NumericAndLatinFont','Microsoft JhengHei','ZCOOL KuaiLe','Noto Sans TC',sans-serif
-    }
-    #new-homework-input:focus{outline:none;border-color:#2b7de9;box-shadow:0 0 0 4px rgba(43,125,233,.16)}
-    .add-btn{background:var(--primary-color);color:#fff}
-
-    button{
-      border:none;font-weight:700;cursor:pointer;transition:all .2s ease;
-      border-radius:14px!important;padding:12px 16px
-    }
-    .btn-primary{background:var(--primary-color);color:#fff}
-    .btn-secondary{background:rgba(0,0,0,.06);color:#111;border:1px solid rgba(0,0,0,.12)}
-    .btn-danger{background:rgba(217,44,44,.08);color:#b21f1f;border:1px solid rgba(217,44,44,.25)}
-    .delete-item-btn{opacity:0;background:none;color:rgba(0,0,0,.55);font-size:1.2em;line-height:1;padding:6px 10px}
+    .homework-item:hover{background-color:rgba(0,0,0,.03)}
+    .item-index{color:#555;font-weight:700;margin-top:2px}
+    .item-content{flex:1;white-space:pre-wrap;outline:none}
+    .delete-item-btn{opacity:0;background:none;border:none;font-size:1.2em;cursor:pointer;color:#777}
     .homework-item:hover .delete-item-btn{opacity:1}
-    .delete-item-btn:hover{color:#b21f1f;transform:scale(1.08)}
 
+    /* ====== 新增輸入列 ====== */
+    #homework-input-area{
+      display:flex;gap:8px;background:rgba(0,0,0,.05);
+      border-radius:var(--control-border-radius);
+      padding:10px;border:1px solid rgba(0,0,0,.08);
+      margin-top:14px;
+    }
+    #new-homework-input{
+      flex:1;padding:10px 12px;font-size:1.2em;
+      border-radius:10px;border:1px solid rgba(0,0,0,.15);
+    }
+    #new-homework-input:focus{outline:none;border-color:var(--primary-color);box-shadow:0 0 0 3px rgba(43,125,233,.2)}
+    .add-btn{background:var(--primary-color);color:#fff;border:none;border-radius:10px;padding:10px 14px;cursor:pointer}
+
+    /* ====== 按鈕列 ====== */
     .footer-buttons{
-      display:grid;grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-      gap:12px;margin-top:18px;align-items:center
+      display:grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap:10px;margin-top:16px;
     }
-    .font-slider-container{
-      display:flex;align-items:center;gap:12px;background:rgba(0,0,0,.06);
-      padding:10px 14px;border:1px solid rgba(0,0,0,.1);border-radius:14px
-    }
-    .font-slider-container label{font-family:'ZCOOL KuaiLe','Microsoft JhengHei','Noto Sans TC',sans-serif;font-size:1.1em;font-weight:800}
-    #font-size-slider{width:100%;-webkit-appearance:none;background:transparent}
-    #font-size-slider:focus{outline:none}
-    #font-size-slider::-webkit-slider-runnable-track{height:6px;background:rgba(0,0,0,.25);border-radius:6px}
-    #font-size-slider::-webkit-slider-thumb{-webkit-appearance:none;height:22px;width:22px;background:var(--primary-color);border-radius:50%;margin-top:-8px;cursor:pointer}
+    button{border:none;border-radius:12px;padding:10px 14px;font-weight:700;cursor:pointer}
+    .btn-primary{background:var(--primary-color);color:#fff}
+    .btn-secondary{background:rgba(0,0,0,.05);border:1px solid rgba(0,0,0,.12)}
+    .font-slider-container{display:flex;align-items:center;gap:10px;background:rgba(0,0,0,.05);padding:8px 10px;border-radius:10px}
+    .color-tools{display:flex;gap:10px;justify-content:center;align-items:center}
+    .color-tools select,.color-tools input[type=color]{padding:8px 10px;border-radius:10px;border:1px solid rgba(0,0,0,.12)}
 
-    /* 局部字色工具 */
-    .color-tools{display:flex;gap:10px;align-items:center;justify-content:center}
-    .color-tools select, .color-tools input[type="color"]{
-      padding:10px 12px;border-radius:12px;border:1px solid rgba(0,0,0,.12);background:#fff;cursor:pointer;font-weight:700
-    }
+    /* ====== 直書模式 ====== */
+    .vertical-mode{flex-direction:row-reverse;align-items:flex-start;overflow-x:auto;overflow-y:hidden;gap:16px}
+    .vertical-mode .homework-item{flex-direction:column;min-width:110px;min-height:420px;align-items:stretch;padding:14px}
+    .vertical-mode .item-content{writing-mode:vertical-rl;text-align:right}
+    .vertical-mode .horizontal-in-vertical{writing-mode:horizontal-tb;display:inline-block}
 
-    .creator-credit{display:none!important}
-
-    /* 直書模式（同時放大） */
-    .vertical-mode{flex-direction:row-reverse;align-items:flex-start;overflow-x:auto;overflow-y:hidden;gap:22px}
-    .vertical-mode .homework-item{display:flex;flex-direction:column;justify-content:space-between;align-items:stretch;width:auto;min-width:130px;height:98%;min-height:460px;flex-shrink:0;padding:22px 18px}
-    .vertical-mode .item-index{border-bottom:1px solid rgba(0,0,0,.2);padding-bottom:12px;margin-bottom:16px}
-    .vertical-mode .item-content{writing-mode:vertical-rl;overflow-y:auto;text-align:right;max-height:300px;width:auto;line-height:1.6}
-    .vertical-mode .horizontal-in-vertical{writing-mode:horizontal-tb;display:inline-block;text-orientation:mixed}
-    .vertical-mode .delete-item-btn{opacity:1;padding:6px;align-self:center}
-    .vertical-mode>p{writing-mode:vertical-rl;text-orientation:upright;margin:0 auto;align-self:center}
-
-    /* 範本 Modal */
-    #template-modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);background:rgba(0,0,0,.2);align-items:center;justify-content:center;z-index:10;opacity:0;transition:opacity .25s ease}
-    #template-modal.visible{display:flex;opacity:1}
-    .template-card{padding:28px;max-width:920px;width:90%;background:#fff;border-radius:20px;border:1px solid rgba(0,0,0,.12)}
-    .category-tabs{display:flex;flex-wrap:wrap;gap:12px;border-bottom:1px solid rgba(0,0,0,.12);padding-bottom:14px;margin-bottom:18px}
-    .tab-btn{background:rgba(0,0,0,.06);color:#111;padding:12px 16px;border-radius:12px;font-weight:800;border:1px solid rgba(0,0,0,.1)}
-    .tab-btn.active{background:var(--primary-color);color:#fff;border-color:transparent}
-    .templates-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;max-height:50vh;overflow-y:auto;padding-right:12px;font-family:'NumericAndLatinFont','Microsoft JhengHei','ZCOOL KuaiLe','Noto Sans TC',sans-serif}
-    .template-item{background:#fff;border:1px solid rgba(0,0,0,.1);color:#111;text-align:left;padding:16px;border-radius:12px;font-size:1.2em}
+    #template-modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.3);align-items:center;justify-content:center;z-index:10}
+    #template-modal.visible{display:flex}
+    .template-card{background:#fff;padding:24px;border-radius:14px;width:90%;max-width:800px}
+    .category-tabs{display:flex;gap:8px;margin-bottom:10px}
+    .tab-btn{padding:8px 12px;border-radius:8px;border:1px solid rgba(0,0,0,.12);cursor:pointer}
+    .tab-btn.active{background:var(--primary-color);color:#fff}
+    .templates-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;max-height:50vh;overflow:auto}
+    .template-item{padding:10px;border:1px solid rgba(0,0,0,.1);border-radius:10px;cursor:pointer}
     .template-item:hover{background:var(--primary-color);color:#fff}
-
-    @media (max-width: 560px){
-      .main-title{font-size:2.4em}
-      #date-selector{font-size:1.8em}
-      .card{min-height:620px}
-    }
   </style>
 </head>
 <body>
@@ -175,33 +128,31 @@
     <div class="card" id="main-card">
       <div class="card-header">
         <div class="nav-date-group">
-          <button id="prev-day-btn" class="btn-secondary" title="上一日">◀ 上一日</button>
-          <input type="date" id="date-selector" aria-label="選擇日期">
-          <button id="next-day-btn" class="btn-secondary" title="下一日">下一日 ▶</button>
+          <button id="prev-day-btn" class="btn-secondary">◀ 上一日</button>
+          <input type="date" id="date-selector">
+          <button id="next-day-btn" class="btn-secondary">下一日 ▶</button>
         </div>
-        <div id="week-display" aria-live="polite"></div>
+        <div id="week-display"></div>
       </div>
 
-      <ul class="homework-list" id="homework-list" aria-label="聯絡事項清單"></ul>
+      <ul class="homework-list" id="homework-list"></ul>
 
       <div id="homework-input-area">
-        <input type="text" id="new-homework-input" placeholder="新增事項..." aria-label="新增事項">
-        <button id="add-item-btn" class="add-btn" aria-label="加入事項">➕</button>
-        <button id="show-template-btn" class="btn-secondary" title="從範本加入" aria-label="從範本加入">🪄</button>
+        <input type="text" id="new-homework-input" placeholder="新增事項...">
+        <button id="add-item-btn" class="add-btn">➕</button>
+        <button id="show-template-btn" class="btn-secondary">🪄 範本</button>
       </div>
     </div>
 
     <div class="footer-buttons">
-      <button id="toggle-vertical-btn" class="btn-secondary" aria-pressed="false">切換直書</button>
-
+      <button id="toggle-vertical-btn" class="btn-secondary">切換直書</button>
       <div class="font-slider-container">
-        <label for="font-size-slider">字級</label>
-        <input type="range" id="font-size-slider" min="1.2" max="3.2" step="0.1" value="1.9" aria-label="字級大小"> <!-- 預設 1.9 -->
+        <label>字級</label>
+        <input type="range" id="font-size-slider" min="1.2" max="3.0" step="0.1" value="1.9">
       </div>
-
       <div class="color-tools">
-        <select id="color-picker" aria-label="預設字色">
-          <option value="">字色（選擇後套用到選取文字）</option>
+        <select id="color-picker">
+          <option value="">字色</option>
           <option value="#000000">黑色</option>
           <option value="#d92c2c">紅色</option>
           <option value="#1a73e8">藍色</option>
@@ -209,399 +160,125 @@
           <option value="#e37400">橙色</option>
           <option value="#6f42c1">紫色</option>
         </select>
-        <input type="color" id="color-custom" value="#000000" title="自訂字色（選取後套用到選取文字）">
+        <input type="color" id="color-custom" value="#000000">
       </div>
-
       <button id="copy-text-btn" class="btn-secondary">複製文字</button>
       <button id="copy-prev-btn" class="btn-secondary">複製前日</button>
-
       <button id="export-png-btn" class="btn-primary">匯出圖片（卡片）</button>
       <button id="export-fullpng-btn" class="btn-secondary">匯出圖片（整頁）</button>
-
       <button id="toggle-presentation-btn" class="btn-secondary">全螢幕展示</button>
-      <button id="clear-today-btn" class="btn-danger">清空今日</button>
     </div>
   </div>
 
   <div id="template-modal">
     <div class="template-card">
-      <h2 style="margin-top:0;margin-bottom:12px;">選擇作業範本</h2>
+      <h2>選擇作業範本</h2>
       <div id="category-tabs" class="category-tabs"></div>
       <div id="templates-grid" class="templates-grid"></div>
     </div>
   </div>
 
-  <a href="#" class="creator-credit">Created by 方方老師</a>
-
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      document.querySelector('.creator-credit')?.remove();
-      const $  = s => document.querySelector(s);
-      const $$ = s => Array.from(document.querySelectorAll(s));
+    document.addEventListener('DOMContentLoaded',()=>{
+      const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
+      const today=new Date(),pad=n=>String(n).padStart(2,'0');
+      let currentDate=`${today.getFullYear()}-${pad(today.getMonth()+1)}-${pad(today.getDate())}`;
+      let allData=JSON.parse(localStorage.getItem('ultraContactBook_v20_final')||'{}');
+      let isVertical=false;
 
-      const dateSelector = $('#date-selector');
-      const weekDisplay = $('#week-display');
-      const homeworkList = $('#homework-list');
-      const newHomeworkInput = $('#new-homework-input');
-      const addItemBtn = $('#add-item-btn');
-      const exportPngBtn = $('#export-png-btn');
-      const exportFullPngBtn = $('#export-fullpng-btn');
-      const copyTextBtn = $('#copy-text-btn');
-      const copyPrevBtn = $('#copy-prev-btn');
-      const togglePresentationBtn = $('#toggle-presentation-btn');
-      const toggleVerticalBtn = $('#toggle-vertical-btn');
-      const fontSizeSlider = $('#font-size-slider');
-      const prevDayBtn = $('#prev-day-btn');
-      const nextDayBtn = $('#next-day-btn');
-      const colorPicker = $('#color-picker');
-      const colorCustom = $('#color-custom');
+      const dateSelector=$('#date-selector');
+      const weekDisplay=$('#week-display');
+      const list=$('#homework-list');
+      const input=$('#new-homework-input');
+      const prevBtn=$('#prev-day-btn');
+      const nextBtn=$('#next-day-btn');
 
-      const today = new Date();
-      const pad = n => String(n).padStart(2,'0');
-      let currentDate = `${today.getFullYear()}-${pad(today.getMonth()+1)}-${pad(today.getDate())}`;
-      let isPresentationMode = false;
-      let isVerticalMode = false;
-      let allData = JSON.parse(localStorage.getItem('ultraContactBook_v20_final') || '{}');
+      const templates={"國語文":["國習 L__","國語習作 p.__-__","甲本 p.__-__","生字本 L__"],"數學":["數習 p.__-__","數練 第__回"],"英語":["英習 U__","英聽"],"通用":["考卷訂簽","預習 L__","親子共讀"]};
 
-      const templates = {
-        "國語文":["國習 L__","國語習作 p.__-`__`","甲本 p.__-`__`","生字本 L__","語詞本 L__","國練 第__回","圈詞 L__ 寫__遍","背書 L__","默書 L__","日記","閱讀心得"],
-        "數學":["數習 p.__-`__`","數練 第__回","數作 p.__-`__`","計算練習本 p.__","數卷訂簽","應用題 x__"],
-        "英語":["英習 U__","英聽","單字 U__ 寫__遍","背單字 U__","句型練習 x__","課文朗讀 U__"],
-        "社會自然":["社習 p.__-`__`","自習 p.__-`__`","社卷訂簽","自卷訂簽","學習單","報告：__","觀察紀錄：__"],
-        "通用":["考卷訂簽","複習 L__-`__`","預習 L__","發回條","帶__","做家事","運動30分鐘","親子共讀"]
-      };
+      const save=()=>{allData[currentDate]=getItems();localStorage.setItem('ultraContactBook_v20_final',JSON.stringify(allData));};
+      const getItems=()=>$$('.item-content').map(e=>e.textContent.trim()).filter(Boolean);
+      const fmt=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+      const prevDate=s=>{let[d1,m1,dd]=s.split('-').map(Number);let d=new Date(d1,m1-1,dd);d.setDate(d.getDate()-1);return fmt(d);}
+      const nextDate=s=>{let[d1,m1,dd]=s.split('-').map(Number);let d=new Date(d1,m1-1,dd);d.setDate(d.getDate()+1);return fmt(d);}
+      const updateDate=s=>{let d=new Date(s+'T00:00');let w=['日','一','二','三','四','五','六'][d.getDay()];weekDisplay.textContent=`星期${w}`;dateSelector.value=s;};
 
-      const saveData = () => {
-        allData[currentDate] = getCurrentItems();
-        localStorage.setItem('ultraContactBook_v20_final', JSON.stringify(allData));
-      };
-      const loadDataForDate = (date) => { renderHomeworkList(allData[date] || []); };
-      const updateDate = (dateString) => {
-        const d = new Date(dateString + 'T00:00:00');
-        const week = ['星期日','星期一','星期二','星期三','星期四','星期五','星期六'][d.getDay()];
-        weekDisplay.textContent = week;
-        dateSelector.value = dateString;
-      };
-      const ensureDate = () => { if (!dateSelector.value) { dateSelector.value = currentDate; } };
-      const fmt = (d) => { const p=n=>String(n).padStart(2,'0'); return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`; };
-      const getPrevDate = (dateStr) => { const [y,m,dd]=dateStr.split('-').map(Number); const d=new Date(y,m-1,dd); d.setDate(d.getDate()-1); return fmt(d); };
-      const getNextDate = (dateStr) => { const [y,m,dd]=dateStr.split('-').map(Number); const d=new Date(y,m-1,dd); d.setDate(d.getDate()+1); return fmt(d); };
-
-      const processTextForVertical = (text) => {
-        const regex = /([a-zA-Z0-9\s._'`-]+)/g;
-        return text
-          .split('\n')
-          .map(line =>
-            line.split(regex).map(seg =>
-              (regex.test(seg) && seg.trim()!=='')
-                ? `<span class="horizontal-in-vertical">${seg}</span>`
-                : `<span>${seg}</span>`
-            ).join('')
-          ).join('<br>');
-      };
-
-      const getCurrentItems = () =>
-        $$('.item-content').map(el => el.textContent.replace(/\u00A0/g,' ').trim()).filter(Boolean);
-
-      const renderHomeworkList = (items) => {
-        homeworkList.innerHTML = '';
-        if (!items || items.length === 0) {
-          homeworkList.innerHTML = `<p style="font-family:'Microsoft JhengHei','Noto Sans TC',sans-serif;font-size:1.1rem;text-align:center;margin:auto;color:#666;">點擊下方輸入框新增今日聯絡事項</p>`;
-          return;
-        }
-        items.forEach((text, idx) => {
-          const li = document.createElement('li');
-          li.className = 'homework-item';
-          li.setAttribute('draggable','true');
-          const contentHTML = isVerticalMode ? processTextForVertical(text) : text.replace(/</g,'&lt;').replace(/>/g,'&gt;');
-          li.innerHTML = `
-            <span class="grab" title="拖曳排序">☰</span>
-            <span class="item-index">${idx+1}.</span>
-            <span class="item-content" contenteditable="true">${contentHTML}</span>
-            <button class="delete-item-btn" title="刪除">&times;</button>
-          `;
-          homeworkList.appendChild(li);
+      const render=arr=>{
+        list.innerHTML='';
+        if(!arr||arr.length===0){list.innerHTML=`<p style="text-align:center;color:#666;">點擊下方輸入框新增今日事項</p>`;return;}
+        arr.forEach((t,i)=>{
+          const li=document.createElement('li');
+          li.className='homework-item';
+          li.innerHTML=`<span class="item-index">${i+1}.</span><span class="item-content" contenteditable="true">${t}</span><button class="delete-item-btn">×</button>`;
+          list.appendChild(li);
         });
       };
 
-      const addHomework = (text) => {
-        const t = (text||'').trim();
-        if (!t) return;
-        const arr = getCurrentItems();
-        arr.push(t);
-        renderHomeworkList(arr);
-        saveData();
-        newHomeworkInput.value = '';
-        newHomeworkInput.focus();
+      const add=t=>{
+        if(!t.trim())return;
+        const arr=getItems();arr.push(t.trim());
+        render(arr);save();input.value='';
       };
 
-      const togglePresentation = () => {
-        isPresentationMode = !isPresentationMode;
-        document.body.classList.toggle('presentation-mode', isPresentationMode);
-        togglePresentationBtn.textContent = isPresentationMode ? '返回編輯' : '全螢幕展示';
-        if (isPresentationMode) document.documentElement.requestFullscreen?.();
-        else if (document.fullscreenElement) document.exitFullscreen?.();
-      };
-      const toggleVertical = () => {
-        isVerticalMode = !isVerticalMode;
-        homeworkList.classList.toggle('vertical-mode', isVerticalMode);
-        toggleVerticalBtn.setAttribute('aria-pressed', String(isVerticalMode));
-        toggleVerticalBtn.textContent = isVerticalMode ? '切換橫書' : '切換直書';
-        renderHomeworkList(getCurrentItems());
-      };
-      const applyAndSaveFontSize = (size) => { document.documentElement.style.setProperty('--item-font-size', `${size}em`); localStorage.setItem('fontSizePreference_v20', size); };
-      const loadPreferences = () => { const s = localStorage.getItem('fontSizePreference_v20'); if (s) { fontSizeSlider.value = s; applyAndSaveFontSize(s); } };
+      const load=s=>render(allData[s]||[]);
+      updateDate(currentDate);load(currentDate);
 
-      const initTemplateModal = () => {
-        const modal = $('#template-modal');
-        const showTemplateBtn = $('#show-template-btn');
-        const categoryTabs = $('#category-tabs');
-        const templatesGrid = $('#templates-grid');
-        let isInitialized = false;
-        const show = () => modal.classList.add('visible');
-        const hide = () => modal.classList.remove('visible');
-        const renderCategory = (cat) => {
-          categoryTabs.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
-          categoryTabs.querySelector(`.tab-btn[data-category="${cat}"]`)?.classList.add('active');
-          templatesGrid.innerHTML='';
-          (templates[cat]||[]).forEach(t => {
-            const btn = document.createElement('button');
-            btn.className = 'template-item';
-            btn.textContent = t;
-            btn.onclick = () => { addHomework(t); hide(); };
-            templatesGrid.appendChild(btn);
-          });
-        };
-        showTemplateBtn.addEventListener('click', () => {
-          if (!isInitialized) {
-            Object.keys(templates).forEach(cat => {
-              const tab = document.createElement('button');
-              tab.className='tab-btn'; tab.textContent = cat; tab.dataset.category = cat;
-              tab.onclick = () => renderCategory(cat);
-              categoryTabs.appendChild(tab);
-            });
-            renderCategory(Object.keys(templates)[0]);
-            isInitialized = true;
-          }
-          show();
-        });
-        modal.addEventListener('click', e => { if (e.target === modal) hide(); });
-        document.addEventListener('keydown', e => { if (e.key === 'Escape') hide(); });
-      };
+      input.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();add(input.value);}});
+      $('#add-item-btn').onclick=()=>add(input.value);
+      dateSelector.onchange=e=>{save();currentDate=e.target.value;updateDate(currentDate);load(currentDate);}
+      prevBtn.onclick=()=>{save();currentDate=prevDate(currentDate);updateDate(currentDate);load(currentDate);}
+      nextBtn.onclick=()=>{save();currentDate=nextDate(currentDate);updateDate(currentDate);load(currentDate);};
 
-      homeworkList.addEventListener('click', e => {
-        if (e.target.classList.contains('delete-item-btn')) {
-          const item = e.target.closest('.homework-item');
-          const idx = $$('.homework-item').indexOf(item);
-          const arr = getCurrentItems();
-          arr.splice(idx,1);
-          renderHomeworkList(arr);
-          saveData();
+      list.onclick=e=>{
+        if(e.target.classList.contains('delete-item-btn')){
+          const idx=$$('.delete-item-btn').indexOf(e.target);
+          const arr=getItems();arr.splice(idx,1);
+          render(arr);save();
         }
-      });
-      homeworkList.addEventListener('focusout', e => { if (e.target.classList.contains('item-content')) saveData(); });
-      homeworkList.addEventListener('paste', e => {
-        if (e.target.classList.contains('item-content')) {
-          e.preventDefault();
-          const text = (e.clipboardData || window.clipboardData).getData('text');
-          document.execCommand('insertText', false, text);
-        }
-      });
-      let dragIndex = null;
-      homeworkList.addEventListener('dragstart', e => {
-        const li = e.target.closest('.homework-item');
-        if (!li) return;
-        li.classList.add('dragging');
-        dragIndex = $$('.homework-item').indexOf(li);
-        e.dataTransfer.effectAllowed = 'move';
-      });
-      homeworkList.addEventListener('dragend', e => {
-        e.target.closest('.homework-item')?.classList.remove('dragging');
-        $$('.homework-item').forEach(li=>li.classList.remove('drag-over'));
-        dragIndex = null;
-      });
-      homeworkList.addEventListener('dragover', e => {
-        e.preventDefault();
-        const li = e.target.closest('.homework-item');
-        if (!li) return;
-        $$('.homework-item').forEach(x=>x.classList.remove('drag-over'));
-        li.classList.add('drag-over');
-        e.dataTransfer.dropEffect = 'move';
-      });
-      homeworkList.addEventListener('drop', e => {
-        e.preventDefault();
-        const li = e.target.closest('.homework-item');
-        $$('.homework-item').forEach(x=>x.classList.remove('drag-over'));
-        if (li == null || dragIndex == null) return;
-        const dropIndex = $$('.homework-item').indexOf(li);
-        if (dropIndex === -1 || dragIndex === dropIndex) return;
-        const arr = getCurrentItems();
-        const [moved] = arr.splice(dragIndex,1);
-        arr.splice(dropIndex,0,moved);
-        renderHomeworkList(arr);
-        saveData();
-      });
-
-      updateDate(currentDate);
-      loadDataForDate(currentDate);
-      loadPreferences();
-      initTemplateModal();
-      requestAnimationFrame(() => ensureDate());
-
-      addItemBtn.addEventListener('click', () => addHomework(newHomeworkInput.value));
-      newHomeworkInput.addEventListener('keydown', e => {
-        if (e.key==='Enter' && !e.isComposing) { e.preventDefault(); document.execCommand('insertLineBreak'); }
-      });
-      dateSelector.addEventListener('change', e => { saveData(); currentDate = e.target.value; updateDate(currentDate); loadDataForDate(currentDate); });
-
-      // 上一日 / 下一日（不支援鍵盤左右鍵）
-      prevDayBtn.addEventListener('click', () => {
-        saveData();
-        currentDate = getPrevDate(currentDate);
-        updateDate(currentDate);
-        loadDataForDate(currentDate);
-      });
-      nextDayBtn.addEventListener('click', () => {
-        saveData();
-        currentDate = getNextDate(currentDate);
-        updateDate(currentDate);
-        loadDataForDate(currentDate);
-      });
-
-      // 文字複製
-      copyTextBtn.addEventListener('click', async () => {
-        ensureDate();
-        const d = new Date(dateSelector.value + 'T00:00:00');
-        const week = ['日','一','二','三','四','五','六'][d.getDay()];
-        const header = `${dateSelector.value.replace(/-/g,'/')}（星期${week}）`;
-        const items = getCurrentItems().map((t,i)=>`${i+1}. ${t}`).join('\n');
-        const text = `${header}\n${items}`;
-        try{ await navigator.clipboard.writeText(text); alert('已複製到剪貼簿'); } catch{ prompt('複製失敗，請手動複製：', text); }
-      });
-
-      // 複製前日
-      const findPreviousDateWithData = (dateStr, limit=60) => {
-        let d=dateStr;
-        for(let i=0;i<limit;i++){
-          d=getPrevDate(d);
-          const arr=allData?.[d];
-          if(Array.isArray(arr)&&arr.length>0) return d;
-        }
-        return null;
       };
-      copyPrevBtn.addEventListener('click', () => {
-        ensureDate();
-        const prev = findPreviousDateWithData(currentDate, 60);
-        if (!prev) { alert('找不到前日的聯絡事項（最近 60 天都沒有資料）。'); return; }
-        const prevItems = (allData[prev] || []).slice();
-        if (prevItems.length === 0) { alert(`${prev} 沒有項目可複製。`); return; }
-        const replace = confirm(`找到 ${prev} 的 ${prevItems.length} 項。\n\n按「確定」→ 覆蓋今天\n按「取消」→ 追加到今天後面`);
-        const result = replace ? prevItems : [...getCurrentItems(), ...prevItems];
-        renderHomeworkList(result);
-        saveData();
-        alert(replace ? '已覆蓋今日項目。' : '已把前日項目追加到今天。');
-      });
+      list.addEventListener('focusout',e=>{if(e.target.classList.contains('item-content'))save();});
 
-      // 直書 / 字級
-      togglePresentationBtn.addEventListener('click', togglePresentation);
-      document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement && isPresentationMode) togglePresentation(); });
-      toggleVerticalBtn.addEventListener('click', toggleVertical);
-      fontSizeSlider.addEventListener('input', e => applyAndSaveFontSize(e.target.value));
+      /* 字級與直書 */
+      $('#font-size-slider').oninput=e=>document.documentElement.style.setProperty('--item-font-size',`${e.target.value}em`);
+      $('#toggle-vertical-btn').onclick=()=>{isVertical=!isVertical;list.classList.toggle('vertical-mode',isVertical);};
 
-      // 局部字色
-      const applyColorToSelection = (color) => {
-        if (!color) return;
-        document.execCommand('styleWithCSS', false, true);
-        document.execCommand('foreColor', false, color);
+      /* 字色 */
+      const applyColor=c=>{if(!c)return;document.execCommand('styleWithCSS',false,true);document.execCommand('foreColor',false,c);};
+      $('#color-picker').onchange=()=>{applyColor($('#color-picker').value);$('#color-picker').value='';};
+      $('#color-custom').oninput=()=>applyColor($('#color-custom').value);
+
+      /* 複製文字 */
+      $('#copy-text-btn').onclick=async()=>{
+        const d=new Date(dateSelector.value+'T00:00');const w=['日','一','二','三','四','五','六'][d.getDay()];
+        const text=`${dateSelector.value.replace(/-/g,'/')}（星期${w}）\n`+getItems().map((t,i)=>`${i+1}. ${t}`).join('\n');
+        await navigator.clipboard.writeText(text);alert('已複製文字');
       };
-      colorPicker.addEventListener('change', () => {
-        applyColorToSelection(colorPicker.value);
-        colorPicker.value = "";
-      });
-      colorCustom.addEventListener('input', () => {
-        applyColorToSelection(colorCustom.value);
-      });
 
-      // 匯出 PNG（卡片）
-      exportPngBtn.addEventListener('click', async () => {
-        ensureDate();
-        if (typeof html2canvas !== 'function') return alert('匯出模組未載入，請檢查網路');
-        const d = new Date(dateSelector.value + 'T00:00:00');
-        const ts = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
-        const old = exportPngBtn.textContent; exportPngBtn.disabled = true; exportPngBtn.textContent = '匯出中…';
+      /* 複製前日 */
+      const findPrev=d=>{let dd=d;for(let i=0;i<60;i++){dd=prevDate(dd);if(allData[dd]?.length)return dd;}return null;}
+      $('#copy-prev-btn').onclick=()=>{
+        const p=findPrev(currentDate);if(!p){alert('找不到前日資料');return;}
+        const prevItems=allData[p];if(!prevItems.length){alert('前日無資料');return;}
+        const replace=confirm(`找到 ${p} 的 ${prevItems.length} 項，確定覆蓋？（取消為追加）`);
+        const newArr=replace?prevItems:[...getItems(),...prevItems];
+        render(newArr);save();
+      };
 
-        const bar = $('#homework-input-area'); const prevDisplay = bar?.style.display; if (bar) bar.style.display = 'none';
-
+      /* 匯出 PNG */
+      const exportImage=async(node,name)=>{
+        const bar=$('#homework-input-area');bar.style.display='none';
         try{
-          const node = $('#main-card');
-          const canvas = await html2canvas(node,{
-            scale: Math.min(window.devicePixelRatio||1,3),
-            useCORS: true,
-            backgroundColor: '#ffffff',
-            logging: false,
-            onclone:(doc)=>{
-              doc.body.style.background = '#ffffff';
-              const card=doc.querySelector('#main-card');
-              if(card){
-                card.style.background = '#ffffff';
-                card.style.boxShadow = '0 14px 40px rgba(0,0,0,.08)';
-                const list=card.querySelector('#homework-list');
-                if(list) list.style.overflow='visible';
-              }
-              doc.querySelectorAll('.item-content, .item-index, #week-display, #date-selector, .main-title')
-                 .forEach(el => el.style.color = '#000000');  // 文字純黑
-              const barClone = doc.querySelector('#homework-input-area'); if (barClone) barClone.remove();
-            }
-          });
-          const a=document.createElement('a'); a.download=`聯絡簿_${ts}.png`; a.href=canvas.toDataURL('image/png'); document.body.appendChild(a); a.click(); a.remove();
-        }catch(e){ alert('匯出圖片失敗：'+(e?.message||e)); }
-        finally{ if (bar) bar.style.display = prevDisplay ?? ''; exportPngBtn.disabled=false; exportPngBtn.textContent=old; }
-      });
+          const canvas=await html2canvas(node,{scale:2,useCORS:true,backgroundColor:'#fff',onclone:doc=>{
+            doc.querySelectorAll('.item-content,.item-index,#week-display,#date-selector,.main-title').forEach(el=>el.style.color='#000');
+            doc.querySelector('#homework-input-area')?.remove();
+          }});
+          const a=document.createElement('a');a.download=`${name}.png`;a.href=canvas.toDataURL();a.click();
+        }finally{bar.style.display='flex';}
+      };
+      $('#export-png-btn').onclick=()=>exportImage($('#main-card'),`聯絡簿_${currentDate}`);
+      $('#export-fullpng-btn').onclick=()=>exportImage($('.container'),`聯絡簿整頁_${currentDate}`);
 
-      // 匯出 PNG（整頁）
-      exportFullPngBtn.addEventListener('click', async () => {
-        ensureDate();
-        if (typeof html2canvas !== 'function') return alert('匯出模組未載入，請檢查網路');
-        const d = new Date(dateSelector.value + 'T00:00:00');
-        const ts = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
-        const old = exportFullPngBtn.textContent; exportFullPngBtn.disabled = true; exportFullPngBtn.textContent = '匯出中…';
-
-        const bar = $('#homework-input-area'); const prevDisplay = bar?.style.display; if (bar) bar.style.display = 'none';
-
-        try{
-          const node = $('.container');
-          const canvas = await html2canvas(node,{
-            scale: Math.min(window.devicePixelRatio||1,2.5),
-            useCORS: true,
-            backgroundColor: '#ffffff',
-            logging: false,
-            onclone:(doc)=>{
-              doc.body.style.background='#ffffff';
-              const card=doc.querySelector('#main-card');
-              if(card){
-                card.style.background = '#ffffff';
-                card.style.boxShadow = '0 14px 40px rgba(0,0,0,.08)';
-                const list=card.querySelector('#homework-list');
-                if(list) list.style.overflow='visible';
-              }
-              doc.querySelectorAll('.item-content, .item-index, #week-display, #date-selector, .main-title')
-                 .forEach(el => el.style.color = '#000000');
-              const barClone = doc.querySelector('#homework-input-area'); if (barClone) barClone.remove();
-              const modal=doc.getElementById('template-modal'); if(modal) modal.classList.remove('visible');
-            }
-          });
-          const a=document.createElement('a'); a.download=`聯絡簿整頁_${ts}.png`; a.href=canvas.toDataURL('image/png'); document.body.appendChild(a); a.click(); a.remove();
-        }catch(e){ alert('匯出整頁圖片失敗：'+(e?.message||e)); }
-        finally{ if (bar) bar.style.display = prevDisplay ?? ''; exportFullPngBtn.disabled=false; exportFullPngBtn.textContent=old; }
-      });
-
-      $('#clear-today-btn').addEventListener('click', () => {
-        ensureDate();
-        if (!confirm(`確定要清空 ${dateSelector.value} 的事項嗎？`)) return;
-        allData[currentDate] = [];
-        renderHomeworkList([]);
-        saveData();
-      });
+      /* 全螢幕展示 */
+      $('#toggle-presentation-btn').onclick=()=>document.documentElement.requestFullscreen();
     });
   </script>
 </body>
